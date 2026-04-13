@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { User as UserType } from "@/types";
+import { User as UserType } from "@ayasemota/types";
 import {
   User,
   Mail,

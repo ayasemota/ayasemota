@@ -9,18 +9,21 @@ export interface User {
   pin?: string;
   status?: string;
   unclearedAmount?: number;
+  createdAt?: Timestamp;
 }
 
 export interface Payment {
-  id: string | number;
+  id: string;
   amount: number;
   date: string;
-  paymentDate: string;
-  paymentTime: string;
+  paymentDate?: string;
+  paymentTime?: string;
   status: string;
-  reference: string;
-  userEmail: string;
-  createdAt: Timestamp;
+  reference?: string;
+  userEmail?: string;
+  userName?: string;
+  userId?: string;
+  createdAt?: Timestamp;
 }
 
 export interface PaymentStats {
@@ -55,4 +58,13 @@ export interface Announcement {
   isVisible: boolean;
   createdAt?: Timestamp;
   updatedAt?: Timestamp;
+}
+
+export interface SignUpForm {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  password: string;
+  confirmPassword: string;
 }

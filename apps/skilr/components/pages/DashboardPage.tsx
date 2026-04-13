@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { User, Payment } from "@/types";
+import { User, Payment } from "@ayasemota/types";
 import { X, Calendar, Megaphone } from "lucide-react";
 
 interface DashboardPageProps {

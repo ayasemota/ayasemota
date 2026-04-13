@@ -12,7 +12,7 @@ import {
   onSnapshot,
 } from "firebase/firestore";
 import { db } from "@ayasemota/firebase";
-import { User } from "@/types";
+import { User } from "@ayasemota/types";
 
 const AUTH_STORAGE_KEY = "skilr_user_session";
 

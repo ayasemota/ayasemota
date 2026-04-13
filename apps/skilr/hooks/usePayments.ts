@@ -10,7 +10,7 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { db } from "@ayasemota/firebase";
-import { Payment } from "@/types";
+import { Payment } from "@ayasemota/types";
 
 export const usePayments = (userEmail: string | null) => {
   const [payments, setPayments] = useState<Payment[]>([]);

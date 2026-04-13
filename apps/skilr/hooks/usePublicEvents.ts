@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
 import { db } from "@ayasemota/firebase";
-import { Event } from "@/types";
+import { Event } from "@ayasemota/types";
 
 interface PublicEvent extends Event {
   date?: string;

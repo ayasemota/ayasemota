@@ -7,7 +7,7 @@ import {
   limit,
 } from "firebase/firestore";
 import { db } from "@ayasemota/firebase";
-import { Announcement } from "@/types";
+import { Announcement } from "@ayasemota/types";
 
 export const usePublicAnnouncements = () => {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);

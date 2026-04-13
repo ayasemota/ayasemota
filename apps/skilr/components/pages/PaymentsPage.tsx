@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { User as UserIcon, Mail, Phone } from "lucide-react";
 import { Timestamp } from "firebase/firestore";
-import { User as UserType, Payment, PaystackResponse } from "@/types";
+import { User as UserType, Payment, PaystackResponse } from "@ayasemota/types";
 import { PAYSTACK_PUBLIC_KEY, convertToKobo } from "@ayasemota/paystack";
 import { usePaystack } from "@/hooks/usePaystack";
 import { usePayments } from "@/hooks/usePayments";
