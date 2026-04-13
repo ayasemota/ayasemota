@@ -1,5 +1,5 @@
 import { doc, setDoc, getDocs, query, collection, where, Timestamp } from "firebase/firestore";
-import { db } from "./firebase";
+import { db } from "shared-firebase";
 
 interface RegistrationData {
   fields: Record<string, string>;
