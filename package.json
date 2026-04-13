@@ -1,0 +1,17 @@
+{
+  "name": "ayasemota",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces",
+    "build": "npm run build --workspaces"
+  },
+  "dependencies": {
+    "firebase": "^12.12.0",
+    "lucide-react": "^1.8.0"
+  }
+}
