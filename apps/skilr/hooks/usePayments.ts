@@ -46,8 +46,8 @@ export const usePayments = (userEmail: string | null) => {
         paymentsData.sort((a, b) =>
           a.createdAt && b.createdAt
             ? b.createdAt.seconds - a.createdAt.seconds
-            : new Date(b.paymentDate).getTime() -
-              new Date(a.paymentDate).getTime()
+            : new Date(b.paymentDate || b.date).getTime() -
+              new Date(a.paymentDate || a.date).getTime()
         );
 
         setPayments(paymentsData);
