@@ -1,0 +1,220 @@
+@import "tailwindcss";
+
+:root {
+  --pending-overlay-bg: rgba(0, 0, 0, 0.6);
+  --pending-overlay-blur: 8px;
+  --pending-card-bg: linear-gradient(145deg, #1f2937, #111827);
+  --pending-card-border: rgba(255, 255, 255, 0.1);
+  --pending-card-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.7), 0 0 40px rgba(124, 58, 237, 0.15);
+  --pending-icon-bg: linear-gradient(135deg, #7c3aed, #4f46e5);
+  --pending-icon-color: #ffffff;
+  --pending-title-color: #ffffff;
+  --pending-description-color: #d1d5db;
+  --pending-status-dot: #facc15;
+  --pending-status-text: #fbbf24;
+  --pending-info-color: #9ca3af;
+  --pending-btn-bg: transparent;
+  --pending-btn-border: rgba(255, 255, 255, 0.15);
+  --pending-btn-text: #d1d5db;
+  --pending-btn-hover-bg: #374151;
+  --pending-btn-hover-border: #4b5563;
+  --pending-btn-hover-text: #ffffff;
+}
+
+a,
+button {
+  cursor: pointer;
+}
+
+.pending-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: var(--pending-overlay-bg);
+  backdrop-filter: blur(var(--pending-overlay-blur));
+  -webkit-backdrop-filter: blur(var(--pending-overlay-blur));
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.pending-card {
+  max-width: 26rem;
+  width: 100%;
+  padding: 2.5rem 2rem;
+  background: var(--pending-card-bg);
+  border: 1px solid var(--pending-card-border);
+  border-radius: 1.5rem;
+  text-align: center;
+  box-shadow: var(--pending-card-shadow);
+  animation: slideUp 0.4s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.pending-icon-container {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 1.75rem;
+}
+
+.pending-icon-bg {
+  width: 5rem;
+  height: 5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--pending-icon-bg);
+  box-shadow: 0 10px 30px rgba(124, 58, 237, 0.4);
+  animation: iconPulse 3s ease-in-out infinite;
+}
+
+@keyframes iconPulse {
+
+  0%,
+  100% {
+    box-shadow: 0 10px 30px rgba(124, 58, 237, 0.4);
+  }
+
+  50% {
+    box-shadow: 0 10px 40px rgba(124, 58, 237, 0.6);
+  }
+}
+
+.pending-icon {
+  color: var(--pending-icon-color);
+}
+
+.pending-lock {
+  width: 2.25rem;
+  height: 2.25rem;
+}
+
+.pending-clock-badge {
+  position: absolute;
+  bottom: -0.25rem;
+  right: -0.25rem;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #facc15;
+  box-shadow: 0 4px 12px rgba(250, 204, 21, 0.4);
+}
+
+.pending-clock {
+  width: 1rem;
+  height: 1rem;
+  color: #1f2937;
+}
+
+.pending-title {
+  font-size: 1.625rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  color: var(--pending-title-color);
+  letter-spacing: -0.025em;
+}
+
+.pending-description {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  color: var(--pending-description-color);
+}
+
+.pending-status-container {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  background: rgba(250, 204, 21, 0.1);
+  border: 1px solid rgba(250, 204, 21, 0.2);
+  margin-bottom: 1.5rem;
+}
+
+.pending-status-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--pending-status-dot);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.5;
+    transform: scale(0.9);
+  }
+}
+
+.pending-status-text {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--pending-status-text);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.pending-info {
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+  color: var(--pending-info-color);
+}
+
+.pending-signout-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 0.75rem;
+  border: 1px solid var(--pending-btn-border);
+  background: var(--pending-btn-bg);
+  color: var(--pending-btn-text);
+  transition: all 0.2s ease;
+}
+
+.pending-signout-btn:hover {
+  background: var(--pending-btn-hover-bg);
+  border-color: var(--pending-btn-hover-border);
+  color: var(--pending-btn-hover-text);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
