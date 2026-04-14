@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Skilr - Management System",
     description: "AY Asemota Payment Management System",
-    siteName: "Kosa",
+    siteName: "Skilr",
     images: [
       {
         url: "/social-preview.png",
