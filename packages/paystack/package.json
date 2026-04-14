@@ -1,12 +1,9 @@
 {
-  "name": "@ayasemota/firebase",
+  "name": "@ayasemota/paystack",
   "version": "1.0.0",
   "main": "index.ts",
   "types": "index.ts",
   "scripts": {
     "build": "echo 'no build script needed'"
-  },
-  "dependencies": {
-    "firebase": "^12.12.0"
   }
 }

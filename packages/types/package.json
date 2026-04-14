@@ -1,5 +1,5 @@
 {
-  "name": "@ayasemota/firebase",
+  "name": "@ayasemota/types",
   "version": "1.0.0",
   "main": "index.ts",
   "types": "index.ts",
@@ -7,6 +7,6 @@
     "build": "echo 'no build script needed'"
   },
   "dependencies": {
-    "firebase": "^12.12.0"
+    "firebase": "^12.7.0"
   }
 }
