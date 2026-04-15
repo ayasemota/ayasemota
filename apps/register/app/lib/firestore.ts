@@ -42,7 +42,10 @@ export async function saveRegistration(data: RegistrationData): Promise<string> 
   };
 
   const userDoc = Object.fromEntries(
-    Object.entries(rawDoc).filter((entry) => entry[1] !== undefined && entry[1] !== "")
+    Object.entries(rawDoc).filter(
+      (entry) =>
+        entry[1] !== undefined && entry[1] !== "" && entry[1] !== "Skip"
+    )
   );
 
   await setDoc(doc(db, "users", docId), userDoc);

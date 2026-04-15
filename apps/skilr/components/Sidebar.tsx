@@ -48,19 +48,7 @@ export const Sidebar = ({
             <span>Dashboard</span>
           </button>
 
-          <button
-            onClick={() => handleNavigate("class")}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg ${
-              currentPage === "class"
-                ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
-                : "text-gray-400 hover:bg-gray-800/50 hover:text-white"
-            }`}
-          >
-            <GraduationCap size={20} />
-            <span>Class</span>
-          </button>
-
-          <button
+            <button
             onClick={() => !isRestricted && handleNavigate("payments")}
             disabled={isRestricted}
             className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-300 ${
@@ -77,6 +65,19 @@ export const Sidebar = ({
             </div>
             {isRestricted && <Lock size={14} className="text-gray-600" />}
           </button>
+          
+          <button
+            onClick={() => handleNavigate("class")}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg ${
+              currentPage === "class"
+                ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                : "text-gray-400 hover:bg-gray-800/50 hover:text-white"
+            }`}
+          >
+            <GraduationCap size={20} />
+            <span>Class</span>
+          </button>
+
           <button
             onClick={() => handleNavigate("help")}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg ${

@@ -169,7 +169,7 @@ export default function SingleFieldStep({
         processedValue = "@" + newValue.replace(/^@+/, "");
       }
     } else if (type === "number") {
-      processedValue = formatNumber(newValue);
+      processedValue = newValue.replace(/[^0-9]/g, "");
     } else if (type === "phone") {
       let clean = newValue.replace(/[^\d]/g, "");
       if (clean.length > 11) clean = clean.substring(0, 11);

@@ -1,17 +1,36 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Briefcase, ExternalLink, Edit2, Trash2, ArrowUp, ArrowDown, Save, X, User as UserIcon, Award } from "lucide-react";
+import {
+  Plus,
+  Briefcase,
+  ExternalLink,
+  Edit2,
+  Trash2,
+  ArrowUp,
+  ArrowDown,
+  Save,
+  X,
+  User as UserIcon,
+  Award,
+} from "lucide-react";
 import { useProjects, Project } from "@/hooks/useProjects";
 import { doc, onSnapshot, setDoc } from "firebase/firestore";
 import { db } from "@ayasemota/firebase";
 import { useToast } from "../ToastContext";
 
 export default function ProjectsSection() {
-  const { projects, loading, addProject, updateProject, deleteProject, reorderProject } = useProjects();
+  const {
+    projects,
+    loading,
+    addProject,
+    updateProject,
+    deleteProject,
+    reorderProject,
+  } = useProjects();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { showToast } = useToast();
-  
+
   const [about, setAbout] = useState("");
   const [skills, setSkills] = useState("");
   const [isSubmittingPortfolio, setIsSubmittingPortfolio] = useState(false);
@@ -24,7 +43,9 @@ export default function ProjectsSection() {
         const d = snapshot.data();
         // Only initialize state if we haven't already or if we aren't currently submitting
         if (!isInitialized) {
-          setAbout(Array.isArray(d.about) ? d.about.join("\n\n") : (d.about || ""));
+          setAbout(
+            Array.isArray(d.about) ? d.about.join("\n\n") : d.about || "",
+          );
           setSkills(Array.isArray(d.skills) ? d.skills.join(", ") : "");
           setIsInitialized(true);
         }
@@ -39,10 +60,17 @@ export default function ProjectsSection() {
     setIsSubmittingPortfolio(true);
     try {
       const docRef = doc(db, "settings", "portfolio");
-      await setDoc(docRef, {
-        about: about.split("\n\n").filter(p => p.trim() !== ""),
-        skills: skills.split(",").map(s => s.trim()).filter(s => s !== "")
-      }, { merge: true });
+      await setDoc(
+        docRef,
+        {
+          about: about.split("\n\n").filter((p) => p.trim() !== ""),
+          skills: skills
+            .split(",")
+            .map((s) => s.trim())
+            .filter((s) => s !== ""),
+        },
+        { merge: true },
+      );
       showToast("Portfolio Identity synched successfully!");
     } catch (err) {
       console.error(err);
@@ -110,10 +138,12 @@ export default function ProjectsSection() {
           <UserIcon className="text-primary" />
           Identity
         </h2>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="bg-card rounded-xl border border-border p-6 space-y-4 shadow-sm">
-            <label className="text-xs font-bold uppercase text-muted-foreground block">About Me (Bio)</label>
+            <label className="text-xs font-bold uppercase text-muted-foreground block">
+              About Me (Bio)
+            </label>
             <textarea
               value={about}
               onChange={(e) => setAbout(e.target.value)}
@@ -131,9 +161,11 @@ export default function ProjectsSection() {
               </button>
             </div>
           </div>
-          
+
           <div className="bg-card rounded-xl border border-border p-6 space-y-4 shadow-sm h-full flex flex-col">
-            <label className="text-xs font-bold uppercase text-muted-foreground block">Skills (Comma Separated)</label>
+            <label className="text-xs font-bold uppercase text-muted-foreground block">
+              Skills (Comma Separated)
+            </label>
             <textarea
               value={skills}
               onChange={(e) => setSkills(e.target.value)}
@@ -172,16 +204,29 @@ export default function ProjectsSection() {
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-muted/50 border-b border-border">
-              <th className="px-6 py-4 text-sm font-semibold text-muted-foreground uppercase tracking-wider">Order</th>
-              <th className="px-6 py-4 text-sm font-semibold text-muted-foreground uppercase tracking-wider">Project</th>
-              <th className="px-6 py-4 text-sm font-semibold text-muted-foreground uppercase tracking-wider">Tech Stack</th>
-              <th className="px-6 py-4 text-sm font-semibold text-muted-foreground uppercase tracking-wider">Year</th>
-              <th className="px-6 py-4 text-sm font-semibold text-muted-foreground uppercase tracking-wider text-right">Actions</th>
+              <th className="px-6 py-4 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                Order
+              </th>
+              <th className="px-6 py-4 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                Project
+              </th>
+              <th className="px-6 py-4 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                Tech Stack
+              </th>
+              <th className="px-6 py-4 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                Year
+              </th>
+              <th className="px-6 py-4 text-sm font-semibold text-muted-foreground uppercase tracking-wider text-right">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
             {projects.map((project, index) => (
-              <tr key={project.id} className="hover:bg-muted/30 transition-colors">
+              <tr
+                key={project.id}
+                className="hover:bg-muted/30 transition-colors"
+              >
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-1">
                     <button
@@ -204,18 +249,23 @@ export default function ProjectsSection() {
                 </td>
                 <td className="px-6 py-4">
                   <div>
-                    <div className="font-bold text-foreground">{project.title}</div>
-                    <a 
-                      href={project.link} 
-                      target="_blank" 
+                    <div className="font-bold text-foreground">
+                      {project.title}
+                    </div>
+                    <a
+                      href={project.link}
+                      target="_blank"
                       rel="noopener noreferrer"
                       className="text-xs text-primary hover:underline flex items-center gap-1 mt-0.5"
                     >
-                      {new URL(project.link).hostname} <ExternalLink size={10} />
+                      {new URL(project.link).hostname}{" "}
+                      <ExternalLink size={10} />
                     </a>
                   </div>
                 </td>
-                <td className="px-6 py-4 text-sm text-muted-foreground">{project.tech}</td>
+                <td className="px-6 py-4 text-sm text-muted-foreground">
+                  {project.tech}
+                </td>
                 <td className="px-6 py-4 text-sm">{project.date}</td>
                 <td className="px-6 py-4 text-right">
                   <div className="flex items-center justify-end gap-2">
@@ -227,7 +277,11 @@ export default function ProjectsSection() {
                     </button>
                     <button
                       onClick={() => {
-                        if (confirm("Are you sure you want to delete this project?")) {
+                        if (
+                          confirm(
+                            "Are you sure you want to delete this project?",
+                          )
+                        ) {
                           deleteProject(project.id!);
                         }
                       }}
@@ -255,7 +309,7 @@ export default function ProjectsSection() {
               <h3 className="text-xl font-bold text-foreground">
                 {editingProject ? "Edit Project" : "Add New Project"}
               </h3>
-              <button 
+              <button
                 onClick={() => setIsModalOpen(false)}
                 className="p-2 hover:bg-muted rounded-full transition-colors"
               >
@@ -265,54 +319,74 @@ export default function ProjectsSection() {
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase text-muted-foreground">Project Title</label>
+                  <label className="text-xs font-bold uppercase text-muted-foreground">
+                    Project Title
+                  </label>
                   <input
                     required
                     value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, title: e.target.value })
+                    }
                     className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:outline-none"
                     placeholder="e.g. Paycort"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase text-muted-foreground">Year</label>
+                  <label className="text-xs font-bold uppercase text-muted-foreground">
+                    Year
+                  </label>
                   <input
                     required
                     value={formData.date}
-                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, date: e.target.value })
+                    }
                     className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:outline-none"
                     placeholder="e.g. 2025"
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-bold uppercase text-muted-foreground">Live Link</label>
+                <label className="text-xs font-bold uppercase text-muted-foreground">
+                  Live Link
+                </label>
                 <input
                   required
                   type="url"
                   value={formData.link}
-                  onChange={(e) => setFormData({ ...formData, link: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, link: e.target.value })
+                  }
                   className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:outline-none"
                   placeholder="https://..."
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-bold uppercase text-muted-foreground">Tech Stack</label>
+                <label className="text-xs font-bold uppercase text-muted-foreground">
+                  Tech Stack
+                </label>
                 <input
                   required
                   value={formData.tech}
-                  onChange={(e) => setFormData({ ...formData, tech: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, tech: e.target.value })
+                  }
                   className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:outline-none"
                   placeholder="e.g. Next.js, Firebase, TypeScript"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-bold uppercase text-muted-foreground">Description</label>
+                <label className="text-xs font-bold uppercase text-muted-foreground">
+                  Description
+                </label>
                 <textarea
                   required
                   rows={3}
                   value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
                   className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:outline-none resize-none"
                   placeholder="Brief project summary..."
                 />

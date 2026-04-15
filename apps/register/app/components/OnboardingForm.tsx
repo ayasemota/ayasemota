@@ -69,9 +69,29 @@ export default function OnboardingForm({
 
   const handleBack = useCallback(() => {
     if (currentStep > 0) {
-      setCurrentStep((prev) => prev - 1);
+      const prevStep = currentStep - 1;
+      const step = steps[prevStep];
+
+      // If we're going back to budget or payment-structure, clear them to allow re-entry
+      if (step.kind === "field" && step.id === "budget") {
+        setFormData((prev) => ({
+          ...prev,
+          fields: { ...prev.fields, budget: "" },
+        }));
+      }
+      if (
+        step.kind === "question" &&
+        step.question.id === "payment-structure"
+      ) {
+        setFormData((prev) => ({
+          ...prev,
+          answers: { ...prev.answers, "payment-structure": "" },
+        }));
+      }
+
+      setCurrentStep(prevStep);
     }
-  }, [currentStep]);
+  }, [currentStep, steps]);
 
   const handleRestart = useCallback(() => {
     onRestart();
