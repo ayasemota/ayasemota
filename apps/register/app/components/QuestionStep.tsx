@@ -8,7 +8,7 @@ interface QuestionStepProps {
   question: Question;
   value: string;
   onChange: (value: string) => void;
-  onComplete: () => void;
+  onComplete: (value?: string) => void;
 }
 
 export default function QuestionStep({
@@ -42,7 +42,7 @@ export default function QuestionStep({
           clearTimeout(timerRef.current);
         }
         timerRef.current = setTimeout(() => {
-          onComplete();
+          onComplete(newValue);
         }, 600);
       }
     },
@@ -52,7 +52,7 @@ export default function QuestionStep({
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && localValue.trim()) {
       e.preventDefault();
-      onComplete();
+      onComplete(localValue);
     }
   };
 
@@ -79,7 +79,7 @@ export default function QuestionStep({
             {localValue.trim() && (
               <div className="text-center animate-fade-in">
                 <button
-                  onClick={onComplete}
+                  onClick={() => onComplete(localValue)}
                   className="text-white/50 text-sm hover:text-white/70 transition-colors"
                 >
                   Click Here{" "}

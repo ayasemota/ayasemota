@@ -36,7 +36,8 @@ export default function ProjectsSection() {
   const [about, setAbout] = useState("");
   const [skills, setSkills] = useState<string[]>([]);
   const [newSkill, setNewSkill] = useState("");
-  const [isSubmittingPortfolio, setIsSubmittingPortfolio] = useState(false);
+  const [isSavingBio, setIsSavingBio] = useState(false);
+  const [isSavingSkills, setIsSavingSkills] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
@@ -81,24 +82,43 @@ export default function ProjectsSection() {
     setSkills(newSkills);
   };
 
-  const handleSavePortfolio = async () => {
-    setIsSubmittingPortfolio(true);
+  const handleSaveBio = async () => {
+    setIsSavingBio(true);
     try {
       const docRef = doc(db, "settings", "portfolio");
       await setDoc(
         docRef,
         {
           about: about.split("\n\n").filter((p) => p.trim() !== ""),
+        },
+        { merge: true },
+      );
+      showToast("Bio updated successfully!");
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to save bio");
+    } finally {
+      setIsSavingBio(false);
+    }
+  };
+
+  const handleSaveSkills = async () => {
+    setIsSavingSkills(true);
+    try {
+      const docRef = doc(db, "settings", "portfolio");
+      await setDoc(
+        docRef,
+        {
           skills: skills,
         },
         { merge: true },
       );
-      showToast("Portfolio Identity synched successfully!");
+      showToast("Skills updated successfully!");
     } catch (err) {
       console.error(err);
-      showToast("Failed to save portfolio settings");
+      showToast("Failed to save skills");
     } finally {
-      setIsSubmittingPortfolio(false);
+      setIsSavingSkills(false);
     }
   };
   const [editingProject, setEditingProject] = useState<Project | null>(null);
@@ -174,12 +194,12 @@ export default function ProjectsSection() {
             />
             <div className="pt-2">
               <button
-                onClick={handleSavePortfolio}
-                disabled={isSubmittingPortfolio}
+                onClick={handleSaveBio}
+                disabled={isSavingBio}
                 className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors shadow-sm font-medium disabled:opacity-50"
               >
                 <Save size={18} />
-                {isSubmittingPortfolio ? "Saving..." : "Save Bio"}
+                {isSavingBio ? "Saving..." : "Save Bio"}
               </button>
             </div>
           </div>
@@ -254,12 +274,12 @@ export default function ProjectsSection() {
 
             <div className="pt-2">
               <button
-                onClick={handleSavePortfolio}
-                disabled={isSubmittingPortfolio}
+                onClick={handleSaveSkills}
+                disabled={isSavingSkills}
                 className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors shadow-sm font-medium disabled:opacity-50"
               >
                 <Save size={18} />
-                {isSubmittingPortfolio ? "Saving..." : "Save Skills"}
+                {isSavingSkills ? "Saving..." : "Save Skills"}
               </button>
             </div>
           </div>

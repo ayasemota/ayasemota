@@ -48,44 +48,67 @@ export default function OnboardingForm({
     []
   );
 
-  const handleStepComplete = useCallback(() => {
-    let nextStep = currentStep + 1;
+  const handleStepComplete = useCallback(
+    (manualValue?: string) => {
+      let nextStep = currentStep + 1;
 
-    // Logic to skip payment structure if budget is skipped
-    if (steps[currentStep].kind === "field" && steps[currentStep].id === "budget") {
-      if (formData.fields["budget"] === "Skip") {
-        setFormData((prev) => ({
-          ...prev,
-          answers: { ...prev.answers, "payment-structure": "Skip" },
-        }));
-        if (nextStep < totalSteps - 1) {
-          nextStep += 1; // Skip "payment-structure"
+      const currentStepObj = steps[currentStep];
+      const actualValue =
+        manualValue ??
+        (currentStepObj.kind === "field"
+          ? formData.fields[currentStepObj.id]
+          : formData.answers[currentStepObj.question.id]);
+
+      // Logic to skip payment structure if budget is skipped
+      if (currentStepObj.kind === "field" && currentStepObj.id === "budget") {
+        if (actualValue === "Skip") {
+          setFormData((prev) => ({
+            ...prev,
+            answers: { ...prev.answers, "payment-structure": "Skip" },
+          }));
+          if (nextStep < totalSteps - 1) {
+            nextStep += 1; // Skip "payment-structure"
+          }
         }
       }
-    }
 
-    if (currentStep < totalSteps - 1) {
-      setCurrentStep(nextStep);
-    } else {
-      onComplete(formData);
-    }
-  }, [currentStep, totalSteps, formData, onComplete, steps]);
+      if (currentStep < totalSteps - 1) {
+        setCurrentStep(nextStep);
+      } else {
+        onComplete(formData);
+      }
+    },
+    [currentStep, totalSteps, formData, onComplete, steps]
+  );
 
   const handleBack = useCallback(() => {
     if (currentStep > 0) {
-      const prevStep = currentStep - 1;
-      const step = steps[prevStep];
+      let prevIndex = currentStep - 1;
+      let prevStep = steps[prevIndex];
+
+      // If we are currently at the step after payment-structure (e.g. phone)
+      // and budget was skipped, we should go back to budget (skipping payment-structure)
+      if (
+        prevStep.kind === "question" &&
+        prevStep.question.id === "payment-structure" &&
+        formData.fields["budget"] === "Skip"
+      ) {
+        if (prevIndex > 0) {
+          prevIndex -= 1;
+          prevStep = steps[prevIndex];
+        }
+      }
 
       // If we're going back to budget or payment-structure, clear them to allow re-entry
-      if (step.kind === "field" && step.id === "budget") {
+      if (prevStep.kind === "field" && prevStep.id === "budget") {
         setFormData((prev) => ({
           ...prev,
           fields: { ...prev.fields, budget: "" },
         }));
       }
       if (
-        step.kind === "question" &&
-        step.question.id === "payment-structure"
+        prevStep.kind === "question" &&
+        prevStep.question.id === "payment-structure"
       ) {
         setFormData((prev) => ({
           ...prev,
@@ -93,9 +116,9 @@ export default function OnboardingForm({
         }));
       }
 
-      setCurrentStep(prevStep);
+      setCurrentStep(prevIndex);
     }
-  }, [currentStep, steps]);
+  }, [currentStep, steps, formData.fields]);
 
   const handleRestart = useCallback(() => {
     onRestart();

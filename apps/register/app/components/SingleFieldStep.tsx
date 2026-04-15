@@ -18,7 +18,7 @@ interface SingleFieldStepProps {
     | "pin";
   value: string;
   onChange: (value: string) => void;
-  onComplete: () => void;
+  onComplete: (value?: string) => void;
   autoAdvance?: boolean;
   minValue?: number;
 }
@@ -198,7 +198,7 @@ export default function SingleFieldStep({
   const handleSkip = () => {
     setLocalValue("Skip");
     onChange("Skip");
-    onComplete();
+    onComplete("Skip");
   };
 
   const validateAndComplete = useCallback(async () => {
@@ -337,7 +337,7 @@ export default function SingleFieldStep({
         }
       }
 
-      onComplete();
+      onComplete(localValue);
     } catch (err) {
       console.error(err);
       setError("An error occurred verifying details.");
