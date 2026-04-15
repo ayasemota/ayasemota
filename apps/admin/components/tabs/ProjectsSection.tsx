@@ -44,7 +44,6 @@ export default function ProjectsSection() {
     const unsubscribe = onSnapshot(docRef, (snapshot) => {
       if (snapshot.exists()) {
         const d = snapshot.data();
-        // Only initialize state if we haven't already or if we aren't currently submitting
         if (!isInitialized) {
           setAbout(
             Array.isArray(d.about) ? d.about.join("\n\n") : d.about || "",
@@ -173,7 +172,6 @@ export default function ProjectsSection() {
 
   return (
     <div className="space-y-12">
-      {/* Portfolio Settings Section */}
       <div className="space-y-6">
         <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
           <UserIcon className="text-primary" />

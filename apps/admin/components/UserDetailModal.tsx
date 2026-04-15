@@ -239,7 +239,19 @@ export default function UserDetailModal({
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
-
+            <div className="space-y-2 mt-4">
+              <label className="text-xs font-bold uppercase text-muted-foreground flex items-center gap-2">
+                Telegram Class Link
+              </label>
+              <input
+                type="text"
+                value={editedUser.classLink || ""}
+                onChange={(e) => handleFieldChange("classLink", e.target.value)}
+                onBlur={handleSave}
+                placeholder="https://t.me/..."
+                className="w-full px-4 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-primary focus:outline-none"
+              />
+            </div>
 
             {/* Registration Details Accordion */}
             <div className="pt-4 border-t border-gray-200 mt-4">
@@ -249,9 +261,13 @@ export default function UserDetailModal({
                 type="button"
               >
                 <span>Registration Details</span>
-                {showRegDetails ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                {showRegDetails ? (
+                  <ChevronUp size={18} />
+                ) : (
+                  <ChevronDown size={18} />
+                )}
               </button>
-              
+
               {showRegDetails && (
                 <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
@@ -297,13 +313,18 @@ export default function UserDetailModal({
                 </div>
               )}
             </div>
-            
+
             {/* Delete button section */}
             <div className="pt-4 border-t border-gray-200 mt-4">
               {showDeleteConfirm ? (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4 space-y-4">
-                  <p className="text-red-800 font-medium">Are you sure you want to delete this user?</p>
-                  <p className="text-red-600 text-sm">This action cannot be undone and will permanently remove this user.</p>
+                  <p className="text-red-800 font-medium">
+                    Are you sure you want to delete this user?
+                  </p>
+                  <p className="text-red-600 text-sm">
+                    This action cannot be undone and will permanently remove
+                    this user.
+                  </p>
                   <div className="flex gap-3">
                     <button
                       onClick={handleDelete}
@@ -330,23 +351,8 @@ export default function UserDetailModal({
                 </button>
               )}
             </div>
-
           </div>
 
-          <div className="space-y-2 mt-4">
-              <label className="text-xs font-bold uppercase text-muted-foreground flex items-center gap-2">
-                Telegram Class Link
-              </label>
-              <input
-                type="text"
-                value={editedUser.classLink || ""}
-                onChange={(e) => handleFieldChange("classLink", e.target.value)}
-                onBlur={handleSave}
-                placeholder="https://t.me/..."
-                className="w-full px-4 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-primary focus:outline-none"
-              />
-          </div>
-          
           <div>
             <div className="flex items-center justify-between mb-4">
               <h4 className="text-base md:text-lg font-semibold text-gray-900">
@@ -426,7 +432,6 @@ export default function UserDetailModal({
                 </table>
               </div>
             </div>
-
           </div>
         </div>
       </Modal>

@@ -59,7 +59,6 @@ export default function OnboardingForm({
           ? formData.fields[currentStepObj.id]
           : formData.answers[currentStepObj.question.id]);
 
-      // Logic to skip payment structure if budget is skipped
       if (currentStepObj.kind === "field" && currentStepObj.id === "budget") {
         if (actualValue === "Skip") {
           setFormData((prev) => ({
@@ -67,7 +66,7 @@ export default function OnboardingForm({
             answers: { ...prev.answers, "payment-structure": "Skip" },
           }));
           if (nextStep < totalSteps - 1) {
-            nextStep += 1; // Skip "payment-structure"
+            nextStep += 1;
           }
         }
       }
@@ -86,8 +85,6 @@ export default function OnboardingForm({
       let prevIndex = currentStep - 1;
       let prevStep = steps[prevIndex];
 
-      // If we are currently at the step after payment-structure (e.g. phone)
-      // and budget was skipped, we should go back to budget (skipping payment-structure)
       if (
         prevStep.kind === "question" &&
         prevStep.question.id === "payment-structure" &&
@@ -99,7 +96,6 @@ export default function OnboardingForm({
         }
       }
 
-      // If we're going back to budget or payment-structure, clear them to allow re-entry
       if (prevStep.kind === "field" && prevStep.id === "budget") {
         setFormData((prev) => ({
           ...prev,

@@ -48,7 +48,6 @@ export default function UsersSection({
   const handleAddUser = async () => {
     if (!newUser.email) return;
 
-    // Validation: Check for unique email, phone, and pin
     const emailConflict = users.find(u => u.email.toLowerCase() === newUser.email?.toLowerCase());
     if (emailConflict) {
       showToast("Email is already in use by another user");

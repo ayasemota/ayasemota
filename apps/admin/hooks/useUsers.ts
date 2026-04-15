@@ -44,7 +44,7 @@ export const useUsers = () => {
 
       localStorage.removeItem("pending_user_updates");
     } catch (error) {
-      console.error("Error syncing pending user updates:", error);
+      console.error(error);
     }
   }, []);
 
@@ -94,10 +94,7 @@ export const useUsers = () => {
       },
     );
 
-    const handleOnline = () => {
-      console.log("Connection restored - syncing pending user updates");
-      syncPendingUserUpdates();
-    };
+    const handleOnline = () => syncPendingUserUpdates();
 
     window.addEventListener("online", handleOnline);
 

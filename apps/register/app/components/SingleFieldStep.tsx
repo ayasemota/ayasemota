@@ -170,7 +170,6 @@ export default function SingleFieldStep({
       }
     } else if (type === "number") {
       processedValue = newValue.replace(/[^0-9]/g, "");
-      // Prevent leading zeros unless the value is just "0"
       if (processedValue.length > 1 && processedValue.startsWith("0")) {
         processedValue = processedValue.replace(/^0+/, "");
       }

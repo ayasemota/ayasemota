@@ -25,7 +25,6 @@ export async function saveRegistration(data: RegistrationData): Promise<string> 
   const lastName = data.fields.lastName || "";
   const docId = generateDocId(data.fields.email || "", firstName, lastName, data.fields.phone || "");
 
-  // Prepare base document
   const rawDoc: any = {
     firstName,
     lastName,
@@ -39,19 +38,16 @@ export async function saveRegistration(data: RegistrationData): Promise<string> 
     registeredAt: Timestamp.now(),
   };
 
-  // Only add budget-related fields if they aren't "Skip" or empty
   if (data.fields.budget && data.fields.budget !== "Skip") {
     rawDoc.budget = data.fields.budget;
     rawDoc.unclearedAmount =
       parseFloat(String(data.fields.budget).replace(/[^0-9.]/g, "")) || 0;
   }
 
-  // Only add payment structure if it isn't "Skip"
   if (data.answers["payment-structure"] && data.answers["payment-structure"] !== "Skip") {
     rawDoc.paymentStructure = data.answers["payment-structure"];
   }
 
-  // Final filtered document (remove any undefined/empty allowed fields)
   const userDoc = Object.fromEntries(
     Object.entries(rawDoc).filter(
       (entry) => entry[1] !== undefined && entry[1] !== ""
