@@ -18,6 +18,8 @@ import { UnavailableModal } from "@/components/UnavailableModal";
 import { LogoutModal } from "@/components/LogoutModal";
 import { PendingApprovalOverlay } from "@/components/PendingApprovalOverlay";
 import { Preloader } from "@/components/Preloader";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
+import { Wifi, WifiOff } from "lucide-react";
 
 export default function Dashboard() {
   const {
@@ -34,6 +36,7 @@ export default function Dashboard() {
   const { announcements } = usePublicAnnouncements();
   const { events } = usePublicEvents();
   const router = useRouter();
+  const isOnline = useOnlineStatus();
 
   useEffect(() => {}, [announcements, events]);
   const [currentPage, setCurrentPage] = useState("dashboard");
@@ -92,9 +95,13 @@ export default function Dashboard() {
                 </p>
                 <p className="text-xs text-gray-400">{user.status ?? ""}</p>
               </div>
-              <div className="w-10 h-10 bg-linear-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
+              <div className="w-10 h-10 bg-linear-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold relative">
                 {user.firstName[0]}
                 {user.lastName[0]}
+                <div 
+                  className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 border-2 border-gray-900 rounded-full ${isOnline ? 'bg-green-500' : 'bg-red-500'}`}
+                  title={isOnline ? 'Online' : 'Offline'}
+                />
               </div>
             </div>
           </div>
