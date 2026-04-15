@@ -22,6 +22,7 @@ import { useInactivityLogout } from "@/hooks/useInactivityLogout";
 import { User } from "@ayasemota/types";
 import { Payment } from "@ayasemota/types";
 import { ToastProvider } from "@/components/ToastContext";
+import { useSettings } from "@/hooks/useSettings";
 
 const pageTitles: Record<string, string> = {
   dashboard: "Dashboard",
@@ -60,6 +61,7 @@ function DashboardContent() {
     updateAnnouncement,
     deleteAnnouncement,
   } = useAnnouncements();
+  const { settings, updateSettings } = useSettings();
 
   const [activeSection, setActiveSection] = useState(tab);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -212,6 +214,8 @@ function DashboardContent() {
               events={events}
               announcements={announcements}
               loading={initialLoading}
+              settings={settings}
+              updateSettings={updateSettings}
             />
           )}
 

@@ -63,8 +63,14 @@ export const useUsers = () => {
             lastName: data.lastName || "",
             email: data.email || "",
             phone: data.phone || "",
+            pin: data.pin || "",
             status: data.status || "",
             unclearedAmount: data.unclearedAmount || 0,
+            dateOfBirth: data.dateOfBirth || "",
+            telegramUsername: data.telegramUsername || "",
+            skillLevel: data.skillLevel || "",
+            budget: data.budget || "",
+            paymentStructure: data.paymentStructure || "",
             createdAt: data.createdAt,
           };
         });

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Modal from "./Modal";
 import { User, Payment } from "@ayasemota/types";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import AddPaymentModal from "./AddPaymentModal";
 
 import { useToast } from "./ToastContext";
@@ -44,6 +44,7 @@ export default function UserDetailModal({
   const [showAddPayment, setShowAddPayment] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showRegDetails, setShowRegDetails] = useState(false);
   const { showToast } = useToast();
 
   if (!user || !editedUser) return null;
@@ -101,6 +102,7 @@ export default function UserDetailModal({
         firstName: editedUser.firstName,
         lastName: editedUser.lastName,
         phone: editedUser.phone,
+        pin: editedUser.pin || "",
         status: editedUser.status || "",
         unclearedAmount: unclearedAmount,
       };
@@ -184,6 +186,19 @@ export default function UserDetailModal({
 
             <div>
               <label className="text-xs font-medium text-gray-500 uppercase block mb-2">
+                PIN Code
+              </label>
+              <input
+                type="text"
+                value={editedUser.pin || ""}
+                onChange={(e) => handleFieldChange("pin", e.target.value)}
+                onBlur={handleSave}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-medium text-gray-500 uppercase block mb-2">
                 Account Status
               </label>
               <input
@@ -222,6 +237,63 @@ export default function UserDetailModal({
                 placeholder="0"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
+            </div>
+
+            {/* Registration Details Accordion */}
+            <div className="pt-4 border-t border-gray-200 mt-4">
+              <button
+                onClick={() => setShowRegDetails(!showRegDetails)}
+                className="flex items-center justify-between w-full text-left text-sm font-semibold text-gray-700 hover:text-gray-900 transition-colors"
+                type="button"
+              >
+                <span>Registration Details</span>
+                {showRegDetails ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+              </button>
+              
+              {showRegDetails && (
+                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-medium text-gray-500 uppercase block mb-1">
+                      Date of Birth
+                    </label>
+                    <p className="text-sm text-gray-900 bg-gray-100 px-3 py-2 rounded-lg">
+                      {user.dateOfBirth || "N/A"}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-gray-500 uppercase block mb-1">
+                      Telegram Username
+                    </label>
+                    <p className="text-sm text-gray-900 bg-gray-100 px-3 py-2 rounded-lg">
+                      {user.telegramUsername || "N/A"}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-gray-500 uppercase block mb-1">
+                      Skill Level
+                    </label>
+                    <p className="text-sm text-gray-900 bg-gray-100 px-3 py-2 rounded-lg">
+                      {user.skillLevel || "N/A"}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-gray-500 uppercase block mb-1">
+                      Budget (Input)
+                    </label>
+                    <p className="text-sm text-gray-900 bg-gray-100 px-3 py-2 rounded-lg">
+                      {user.budget || "N/A"}
+                    </p>
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="text-xs font-medium text-gray-500 uppercase block mb-1">
+                      Payment Structure
+                    </label>
+                    <p className="text-sm text-gray-900 bg-gray-100 px-3 py-2 rounded-lg">
+                      {user.paymentStructure || "N/A"}
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
             
             {/* Delete button section */}

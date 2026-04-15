@@ -5,6 +5,7 @@ import { User as UserType, Payment, PaystackResponse } from "@ayasemota/types";
 import { PAYSTACK_PUBLIC_KEY, convertToKobo } from "@ayasemota/paystack";
 import { usePaystack } from "@/hooks/usePaystack";
 import { usePayments } from "@/hooks/usePayments";
+import { useSettings } from "@/hooks/useSettings";
 
 interface PaymentsPageProps {
   user: UserType;
@@ -12,8 +13,6 @@ interface PaymentsPageProps {
   paymentsLoading: boolean;
   updateUnclearedAmount?: (email: string, amount: number) => Promise<void>;
 }
-
-const VAT_RATE = 4;
 
 const formatCurrency = (amount: number) => {
   return amount.toLocaleString("en-NG", {
@@ -51,11 +50,12 @@ export const PaymentsPage = ({
   const [showFailed, setShowFailed] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [pendingPaymentId, setPendingPaymentId] = useState<string | null>(null);
-  const [transactionFee] = useState(
-    () => Math.floor(Math.random() * (600 - 400)) + 300
-  );
   const { initializePayment } = usePaystack();
   const { addPayment, updatePayment } = usePayments(user.email);
+  const { settings } = useSettings();
+
+  const vatRate = settings?.vatRate ?? 0;
+  const transactionFee = settings?.transactionFee ?? 0;
 
   const formatInputValue = (value: string): string => {
     const numericValue = value.replace(/,/g, "");
@@ -84,7 +84,7 @@ export const PaymentsPage = ({
   }, [payments]);
 
   const baseAmount = paymentAmount ? parseFloat(paymentAmount) : 0;
-  const vat = baseAmount * (VAT_RATE / 100);
+  const vat = baseAmount * (vatRate / 100);
   const total = baseAmount + vat + transactionFee;
 
   const handleContinue = () => {
@@ -248,14 +248,18 @@ export const PaymentsPage = ({
                 <span>Amount</span>
                 <span>₦{formatCurrency(baseAmount)}</span>
               </div>
-              <div className="flex justify-between text-gray-300">
-                <span>VAT ({VAT_RATE}%)</span>
-                <span>₦{formatCurrency(vat)}</span>
-              </div>
-              <div className="flex justify-between text-gray-300">
-                <span>Transaction Fee</span>
-                <span>₦{formatCurrency(transactionFee)}</span>
-              </div>
+              {vatRate > 0 && (
+                <div className="flex justify-between text-gray-300">
+                  <span>VAT ({vatRate}%)</span>
+                  <span>₦{formatCurrency(vat)}</span>
+                </div>
+              )}
+              {transactionFee > 0 && (
+                <div className="flex justify-between text-gray-300">
+                  <span>Transaction Fee</span>
+                  <span>₦{formatCurrency(transactionFee)}</span>
+                </div>
+              )}
               <div className="border-t border-gray-700/50 pt-2 mt-2"></div>
               <div className="flex justify-between text-white font-bold text-lg">
                 <span>Total</span>
