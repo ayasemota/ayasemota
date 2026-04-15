@@ -16,7 +16,6 @@ import { Footer } from "@/components/Footer";
 import { Logo } from "@/components/Logo";
 import { UnavailableModal } from "@/components/UnavailableModal";
 import { LogoutModal } from "@/components/LogoutModal";
-import { PendingApprovalOverlay } from "@/components/PendingApprovalOverlay";
 import { Preloader } from "@/components/Preloader";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { Wifi, WifiOff } from "lucide-react";
@@ -43,13 +42,20 @@ export default function Dashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showUnavailableModal, setShowUnavailableModal] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  
+  const isRestricted = !user?.status || user.status === "" || user.status === "Pending";
 
   useEffect(() => {
     const hash = window.location.hash.slice(1);
     if (hash && ["dashboard", "payments", "help", "settings"].includes(hash)) {
-      setTimeout(() => setCurrentPage(hash), 0);
+      if (isRestricted && hash === "payments") {
+        setCurrentPage("dashboard");
+        window.location.hash = "dashboard";
+      } else {
+        setTimeout(() => setCurrentPage(hash), 0);
+      }
     }
-  }, []);
+  }, [isRestricted]);
 
   useEffect(() => {
     if (!loading && !isLoggedIn) {
@@ -110,8 +116,12 @@ export default function Dashboard() {
           currentPage={currentPage}
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
-          onNavigate={setCurrentPage}
+          onNavigate={(page) => {
+            if (isRestricted && page === "payments") return;
+            setCurrentPage(page);
+          }}
           onSignOut={() => setShowLogoutModal(true)}
+          isRestricted={isRestricted}
         />
         <div className="lg:pl-76 pt-2">
           <main className="p-6 lg:p-8 min-h-[calc(100vh-4rem)]">
@@ -120,11 +130,12 @@ export default function Dashboard() {
                 user={user}
                 payments={payments}
                 paymentsLoading={paymentsLoading}
-                onNavigateToPayments={() => setCurrentPage("payments")}
+                onNavigateToPayments={() => !isRestricted && setCurrentPage("payments")}
                 onNavigateToProfile={() => setCurrentPage("settings")}
                 onShowUnavailable={() => setShowUnavailableModal(true)}
                 announcements={announcements}
                 upcomingEvents={events}
+                isRestricted={isRestricted}
               />
             )}
             {currentPage === "payments" && (
@@ -152,12 +163,6 @@ export default function Dashboard() {
         onClose={() => setShowLogoutModal(false)}
         onConfirm={handleSignOut}
       />
-      {(!user.status || user.status === "" || user.status === "Pending") && (
-        <PendingApprovalOverlay
-          onSignOut={handleSignOut}
-          status={user.status}
-        />
-      )}
     </>
   );
 }
