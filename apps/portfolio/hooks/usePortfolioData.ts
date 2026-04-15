@@ -15,6 +15,11 @@ export const usePortfolioData = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!db) {
+      setLoading(false);
+      return;
+    }
+
     const docRef = doc(db, "settings", "portfolio");
     const unsubscribe = onSnapshot(docRef, (snapshot) => {
       if (snapshot.exists()) {
