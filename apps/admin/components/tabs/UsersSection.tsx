@@ -1,9 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Search, ArrowUpDown } from "lucide-react";
+import { Search, ArrowUpDown, Plus } from "lucide-react";
 import { User } from "@ayasemota/types";
 import { TableSkeleton } from "@/components/Skeleton";
+import Modal from "@/components/Modal";
 
 interface UsersSectionProps {
   users: User[];
@@ -13,6 +14,7 @@ interface UsersSectionProps {
   statusFilter: string;
   setStatusFilter: (filter: string) => void;
   setSelectedUser: (user: User) => void;
+  onAddUser: (user: Partial<User>) => Promise<string | void>;
 }
 
 type SortField = "name" | "email" | "phone" | "status";
@@ -26,9 +28,39 @@ export default function UsersSection({
   statusFilter,
   setStatusFilter,
   setSelectedUser,
+  onAddUser,
 }: UsersSectionProps) {
   const [sortField, setSortField] = useState<SortField>("name");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  const [showAddUserForm, setShowAddUserForm] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [newUser, setNewUser] = useState<Partial<User>>({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    status: "Confirmed",
+  });
+
+  const handleAddUser = async () => {
+    if (!newUser.email) return;
+    setIsSaving(true);
+    try {
+      await onAddUser(newUser);
+      setNewUser({
+        firstName: "",
+        lastName: "",
+        email: "",
+        phone: "",
+        status: "Confirmed",
+      });
+      setShowAddUserForm(false);
+    } catch (error) {
+      console.error("Error adding user:", error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -119,7 +151,76 @@ export default function UsersSection({
           <option value="confirmed">Confirmed</option>
           <option value="unconfirmed">Unconfirmed</option>
         </select>
+        <button
+          onClick={() => setShowAddUserForm(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          <Plus size={20} />
+          <span className="hidden sm:inline">Add User</span>
+        </button>
       </div>
+
+      <Modal
+        isOpen={showAddUserForm}
+        onClose={() => setShowAddUserForm(false)}
+        title="Add New User"
+        size="md"
+      >
+        <div className="p-4 md:p-6 space-y-4">
+          <input
+            type="text"
+            placeholder="First Name"
+            value={newUser.firstName || ""}
+            onChange={(e) => setNewUser({ ...newUser, firstName: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+          <input
+            type="text"
+            placeholder="Last Name"
+            value={newUser.lastName || ""}
+            onChange={(e) => setNewUser({ ...newUser, lastName: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+          <input
+            type="email"
+            placeholder="Email (Required)"
+            value={newUser.email || ""}
+            onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+          <input
+            type="text"
+            placeholder="Phone"
+            value={newUser.phone || ""}
+            onChange={(e) => setNewUser({ ...newUser, phone: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+          <select
+            value={newUser.status || ""}
+            onChange={(e) => setNewUser({ ...newUser, status: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option value="Confirmed">Confirmed</option>
+            <option value="Unconfirmed">Unconfirmed</option>
+          </select>
+          <div className="flex flex-col sm:flex-row gap-2 pt-4">
+            <button
+              onClick={handleAddUser}
+              disabled={isSaving || !newUser.email}
+              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSaving ? "Saving..." : "Add User"}
+            </button>
+            <button
+              onClick={() => setShowAddUserForm(false)}
+              disabled={isSaving}
+              className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </Modal>
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <div className="overflow-x-auto">

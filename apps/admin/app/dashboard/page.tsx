@@ -38,7 +38,7 @@ function DashboardContent() {
 
   useInactivityLogout(30);
 
-  const { users, loading: usersLoading, updateUser } = useUsers();
+  const { users, loading: usersLoading, updateUser, addUser, deleteUser } = useUsers();
   const {
     payments,
     loading: paymentsLoading,
@@ -224,6 +224,7 @@ function DashboardContent() {
               statusFilter={statusFilter}
               setStatusFilter={setStatusFilter}
               setSelectedUser={handleSelectUser}
+              onAddUser={addUser}
             />
           )}
 
@@ -272,6 +273,7 @@ function DashboardContent() {
           onPaymentSelect={setSelectedPayment}
           onAddPayment={handleAddPayment}
           onDeletePayment={handlePaymentDelete}
+          onDeleteUser={deleteUser}
         />
       )}
 

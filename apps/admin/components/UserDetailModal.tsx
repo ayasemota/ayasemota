@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Modal from "./Modal";
 import { User, Payment } from "@ayasemota/types";
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import AddPaymentModal from "./AddPaymentModal";
 
 import { useToast } from "./ToastContext";
@@ -26,6 +26,7 @@ interface UserDetailModalProps {
     paymentDate?: string;
   }) => Promise<void>;
   onDeletePayment: (paymentId: string) => Promise<void>;
+  onDeleteUser: (userId: string) => Promise<void>;
 }
 
 export default function UserDetailModal({
@@ -37,10 +38,13 @@ export default function UserDetailModal({
   onPaymentSelect,
   onAddPayment,
   onDeletePayment,
+  onDeleteUser,
 }: UserDetailModalProps) {
   const [editedUser, setEditedUser] = useState<User | null>(user);
   const [showAddPayment, setShowAddPayment] = useState(false);
-  const { showToast, addAction } = useToast();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const { showToast } = useToast();
 
   if (!user || !editedUser) return null;
 
@@ -89,14 +93,6 @@ export default function UserDetailModal({
   const handleSave = async () => {
     if (!user.id) return;
 
-    const previousValues: Partial<User> = {
-      firstName: user.firstName,
-      lastName: user.lastName,
-      phone: user.phone,
-      status: user.status,
-      unclearedAmount: user.unclearedAmount,
-    };
-
     try {
       const unclearedAmount = editedUser.unclearedAmount
         ? parseFloat(String(editedUser.unclearedAmount).replace(/,/g, ""))
@@ -109,65 +105,27 @@ export default function UserDetailModal({
         unclearedAmount: unclearedAmount,
       };
       await onUserUpdate(user.id, newValues);
-
-      const userId = user.id;
-
-      const changes: { field: string; from: string; to: string }[] = [];
-      if (previousValues.firstName !== newValues.firstName) {
-        changes.push({
-          field: "First Name",
-          from: previousValues.firstName || "",
-          to: newValues.firstName || "",
-        });
-      }
-      if (previousValues.lastName !== newValues.lastName) {
-        changes.push({
-          field: "Last Name",
-          from: previousValues.lastName || "",
-          to: newValues.lastName || "",
-        });
-      }
-      if (previousValues.phone !== newValues.phone) {
-        changes.push({
-          field: "Phone",
-          from: previousValues.phone || "",
-          to: newValues.phone || "",
-        });
-      }
-      if (previousValues.status !== newValues.status) {
-        changes.push({
-          field: "Status",
-          from: previousValues.status || "",
-          to: newValues.status || "",
-        });
-      }
-      if (previousValues.unclearedAmount !== newValues.unclearedAmount) {
-        changes.push({
-          field: "Uncleared",
-          from: String(previousValues.unclearedAmount || 0),
-          to: String(newValues.unclearedAmount || 0),
-        });
-      }
-
-      if (changes.length > 0) {
-        addAction(
-          `Updated ${editedUser.firstName} ${editedUser.lastName}`,
-          async () => {
-            await onUserUpdate(userId, previousValues);
-            setEditedUser((prev) =>
-              prev ? { ...prev, ...previousValues } : prev,
-            );
-          },
-          async () => {
-            await onUserUpdate(userId, newValues);
-            setEditedUser((prev) => (prev ? { ...prev, ...newValues } : prev));
-          },
-          { changes },
-        );
-      }
+      setEditedUser((prev) => (prev ? { ...prev, ...newValues } : prev));
+      showToast("User updated successfully");
     } catch (error) {
       console.error("Error saving user:", error);
-      showToast("Failed to save");
+      showToast("Failed to save user");
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!user.id) return;
+    setIsDeleting(true);
+    try {
+      await onDeleteUser(user.id);
+      showToast("User deleted successfully");
+      onClose();
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      showToast("Failed to delete user");
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
     }
   };
 
@@ -264,6 +222,39 @@ export default function UserDetailModal({
                 placeholder="0"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
+            </div>
+            
+            {/* Delete button section */}
+            <div className="pt-4 border-t border-gray-200 mt-4">
+              {showDeleteConfirm ? (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4 space-y-4">
+                  <p className="text-red-800 font-medium">Are you sure you want to delete this user?</p>
+                  <p className="text-red-600 text-sm">This action cannot be undone and will permanently remove this user.</p>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={handleDelete}
+                      disabled={isDeleting}
+                      className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium disabled:opacity-50"
+                    >
+                      {isDeleting ? "Deleting..." : "Confirm Delete"}
+                    </button>
+                    <button
+                      onClick={() => setShowDeleteConfirm(false)}
+                      className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="w-full px-4 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors font-medium flex items-center justify-center gap-2"
+                >
+                  <Trash2 size={18} />
+                  Delete User
+                </button>
+              )}
             </div>
 
           </div>

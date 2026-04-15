@@ -35,7 +35,7 @@ export default function DashboardPage() {
 
   useInactivityLogout(30);
 
-  const { users, loading: usersLoading, updateUser } = useUsers();
+  const { users, loading: usersLoading, updateUser, addUser, deleteUser } = useUsers();
   const { payments, loading: paymentsLoading } = useAllPayments();
   const {
     events,
@@ -185,6 +185,7 @@ export default function DashboardPage() {
               statusFilter={statusFilter}
               setStatusFilter={setStatusFilter}
               setSelectedUser={handleSelectUser}
+              onAddUser={addUser}
             />
           )}
 
@@ -235,6 +236,7 @@ export default function DashboardPage() {
         onPaymentSelect={handlePaymentSelect}
         onAddPayment={handleAddPayment}
         onDeletePayment={async () => {}}
+        onDeleteUser={deleteUser}
       />
 
       <Modal

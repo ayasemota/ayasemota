@@ -23,7 +23,7 @@ export default function EventsSection({
   onUpdateEvent,
   onDeleteEvent,
 }: EventsSectionProps) {
-  const { addAction } = useToast();
+  const { showToast } = useToast();
   const [showNewForm, setShowNewForm] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState<string | null>(
     null,
@@ -41,13 +41,7 @@ export default function EventsSection({
 
     try {
       const newId = await onAddEvent(newEvent);
-      addAction(
-        "Create Event",
-        () => onDeleteEvent(newId),
-        async () => {
-          await onAddEvent(newEvent, newId);
-        },
-      );
+      showToast("Event created successfully");
 
       setNewEvent({
         title: "",
@@ -72,11 +66,7 @@ export default function EventsSection({
 
     try {
       await onUpdateEvent(eventId, { [field]: value });
-      addAction(
-        "Update Event",
-        () => onUpdateEvent(eventId, { [field]: oldEvent[field] }),
-        () => onUpdateEvent(eventId, { [field]: value }),
-      );
+      showToast("Event updated successfully");
     } catch (error) {
       console.error("Error updating event:", error);
     }
@@ -93,14 +83,7 @@ export default function EventsSection({
       try {
         await onDeleteEvent(deleteConfirmation);
         if (deletedEvent) {
-          const { id: _id, ...data } = deletedEvent;
-          addAction(
-            "Delete Event",
-            async () => {
-              await onAddEvent(data, deletedEvent.id);
-            },
-            () => onDeleteEvent(deletedEvent.id!),
-          );
+          showToast("Event deleted successfully");
         }
       } catch (error) {
         console.error("Error deleting event:", error);

@@ -41,7 +41,7 @@ export default function PaymentDetailModal({
   onPaymentDelete,
   onAddPayment,
 }: PaymentDetailModalProps) {
-  const { addAction } = useToast();
+  const { showToast } = useToast();
   const [editedPayment, setEditedPayment] = useState<Payment | null>(payment);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -93,18 +93,7 @@ export default function PaymentDetailModal({
       };
 
       await onPaymentUpdate(payment.id, updates);
-
-      addAction(
-        "Update Payment",
-        () =>
-          onPaymentUpdate(payment.id!, {
-            amount: payment.amount,
-            status: payment.status,
-            paymentDate: payment.paymentDate,
-            paymentTime: payment.paymentTime,
-          }),
-        () => onPaymentUpdate(payment.id!, updates),
-      );
+      showToast("Payment updated successfully");
     } catch (error) {
       console.error("Error saving payment:", error);
     } finally {
@@ -117,27 +106,7 @@ export default function PaymentDetailModal({
     setIsDeleting(true);
     try {
       await onPaymentDelete(payment.id);
-
-      const paymentData = {
-        userEmail: payment.userEmail || "",
-        userName: payment.userName || "",
-        userId: payment.userId || "",
-        amount: payment.amount || 0,
-        status: payment.status || "Pending",
-        reference: payment.reference || "",
-        date: payment.date || "",
-        paymentDate: payment.paymentDate || "",
-        paymentTime: payment.paymentTime || "",
-      };
-
-      addAction(
-        "Delete Payment",
-        async () => {
-          await onAddPayment(paymentData, payment.id);
-        },
-        () => onPaymentDelete(payment.id!),
-      );
-
+      showToast("Payment deleted successfully");
       onClose();
     } catch (error) {
       console.error("Error deleting payment:", error);
