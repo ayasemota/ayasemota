@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { AuthProvider } from "@/components/AuthProvider";
 import "./globals.css";
 
@@ -29,6 +30,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
+        <Script
+          src="https://js.paystack.co/v1/inline.js"
+          strategy="beforeInteractive"
+        />
         <AuthProvider>{children}</AuthProvider>
       </body>
     </html>

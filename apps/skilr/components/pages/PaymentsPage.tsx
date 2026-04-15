@@ -14,7 +14,6 @@ interface PaymentsPageProps {
 }
 
 const VAT_RATE = 4;
-const TRANSACTION_FEE = Math.floor(Math.random() * (600 - 400)) + 300;
 
 const formatCurrency = (amount: number) => {
   return amount.toLocaleString("en-NG", {
@@ -52,6 +51,9 @@ export const PaymentsPage = ({
   const [showFailed, setShowFailed] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [pendingPaymentId, setPendingPaymentId] = useState<string | null>(null);
+  const [transactionFee] = useState(
+    () => Math.floor(Math.random() * (600 - 400)) + 300
+  );
   const { initializePayment } = usePaystack();
   const { addPayment, updatePayment } = usePayments(user.email);
 
@@ -83,7 +85,7 @@ export const PaymentsPage = ({
 
   const baseAmount = paymentAmount ? parseFloat(paymentAmount) : 0;
   const vat = baseAmount * (VAT_RATE / 100);
-  const total = baseAmount + vat + TRANSACTION_FEE;
+  const total = baseAmount + vat + transactionFee;
 
   const handleContinue = () => {
     if (paymentAmount && parseFloat(paymentAmount) > 0) {
@@ -94,6 +96,8 @@ export const PaymentsPage = ({
   const handleConfirmPayment = async () => {
     setProcessing(true);
     const transactionRef = `SKILR-${Date.now()}`;
+
+    let paymentDocId: string | undefined;
 
     try {
       const now = new Date();
@@ -110,64 +114,65 @@ export const PaymentsPage = ({
         userEmail: user.email,
         createdAt: Timestamp.now(),
       };
-      const paymentDocId = await addPayment(pendingPayment, user.email);
+
+      paymentDocId = await addPayment(pendingPayment, user.email);
       setPendingPaymentId(paymentDocId);
-
-      const config = {
-        email: user.email,
-        amount: convertToKobo(total),
-        publicKey: PAYSTACK_PUBLIC_KEY,
-        firstname: user.firstName,
-        lastname: user.lastName,
-        phone: user.phone,
-        ref: transactionRef,
-        onSuccess: async (response: PaystackResponse) => {
-          try {
-            if (paymentDocId) {
-              await updatePayment(paymentDocId, {
-                status: "Completed",
-                reference: response.reference,
-              });
-            }
-
-            if (updateUnclearedAmount) {
-              await updateUnclearedAmount(user.email, baseAmount);
-            }
-
-            setShowSuccess(true);
-            setIsCheckout(false);
-            setPaymentAmount("");
-            setPendingPaymentId(null);
-            setTimeout(() => setShowSuccess(false), 3000);
-          } catch (error) {
-            console.error("Error updating payment:", error);
-          } finally {
-            setProcessing(false);
-          }
-        },
-        onClose: async () => {
-          try {
-            if (paymentDocId) {
-              await updatePayment(paymentDocId, {
-                status: "Failed",
-              });
-            }
-            setShowFailed(true);
-            setTimeout(() => setShowFailed(false), 3000);
-          } catch (error) {
-            console.error("Error updating failed payment:", error);
-          } finally {
-            setProcessing(false);
-            setIsCheckout(false);
-            setPendingPaymentId(null);
-          }
-        },
-      };
-      initializePayment(config);
     } catch (error) {
       console.error("Error saving pending payment:", error);
       setProcessing(false);
+      return;
     }
+
+    await initializePayment({
+      email: user.email,
+      amount: convertToKobo(total),
+      publicKey: PAYSTACK_PUBLIC_KEY,
+      firstname: user.firstName,
+      lastname: user.lastName,
+      phone: user.phone,
+      ref: transactionRef,
+      onSuccess: async (response: PaystackResponse) => {
+        try {
+          if (paymentDocId) {
+            await updatePayment(paymentDocId, {
+              status: "Completed",
+              reference: response.reference,
+            });
+          }
+
+          if (updateUnclearedAmount) {
+            await updateUnclearedAmount(user.email, baseAmount);
+          }
+
+          setShowSuccess(true);
+          setIsCheckout(false);
+          setPaymentAmount("");
+          setPendingPaymentId(null);
+          setTimeout(() => setShowSuccess(false), 3000);
+        } catch (error) {
+          console.error("Error updating payment:", error);
+        } finally {
+          setProcessing(false);
+        }
+      },
+      onClose: async () => {
+        try {
+          if (paymentDocId) {
+            await updatePayment(paymentDocId, {
+              status: "Failed",
+            });
+          }
+          setShowFailed(true);
+          setTimeout(() => setShowFailed(false), 3000);
+        } catch (error) {
+          console.error("Error updating failed payment:", error);
+        } finally {
+          setProcessing(false);
+          setIsCheckout(false);
+          setPendingPaymentId(null);
+        }
+      },
+    });
   };
 
   if (showSuccess) {
@@ -249,7 +254,7 @@ export const PaymentsPage = ({
               </div>
               <div className="flex justify-between text-gray-300">
                 <span>Transaction Fee</span>
-                <span>₦{formatCurrency(TRANSACTION_FEE)}</span>
+                <span>₦{formatCurrency(transactionFee)}</span>
               </div>
               <div className="border-t border-gray-700/50 pt-2 mt-2"></div>
               <div className="flex justify-between text-white font-bold text-lg">
