@@ -9,6 +9,8 @@ import {
   Trash2,
   ArrowUp,
   ArrowDown,
+  ArrowLeft,
+  ArrowRight,
   Save,
   X,
   User as UserIcon,
@@ -32,7 +34,8 @@ export default function ProjectsSection() {
   const { showToast } = useToast();
 
   const [about, setAbout] = useState("");
-  const [skills, setSkills] = useState("");
+  const [skills, setSkills] = useState<string[]>([]);
+  const [newSkill, setNewSkill] = useState("");
   const [isSubmittingPortfolio, setIsSubmittingPortfolio] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
 
@@ -46,7 +49,7 @@ export default function ProjectsSection() {
           setAbout(
             Array.isArray(d.about) ? d.about.join("\n\n") : d.about || "",
           );
-          setSkills(Array.isArray(d.skills) ? d.skills.join(", ") : "");
+          setSkills(Array.isArray(d.skills) ? d.skills : []);
           setIsInitialized(true);
         }
       } else {
@@ -56,6 +59,28 @@ export default function ProjectsSection() {
     return () => unsubscribe();
   }, [isInitialized]);
 
+  const handleAddSkill = () => {
+    if (newSkill.trim() && !skills.includes(newSkill.trim())) {
+      setSkills([...skills, newSkill.trim()]);
+      setNewSkill("");
+    }
+  };
+
+  const handleRemoveSkill = (skillToRemove: string) => {
+    setSkills(skills.filter((s) => s !== skillToRemove));
+  };
+
+  const handleReorderSkill = (index: number, direction: "left" | "right") => {
+    const newSkills = [...skills];
+    const otherIndex = direction === "left" ? index - 1 : index + 1;
+    if (otherIndex < 0 || otherIndex >= newSkills.length) return;
+    [newSkills[index], newSkills[otherIndex]] = [
+      newSkills[otherIndex],
+      newSkills[index],
+    ];
+    setSkills(newSkills);
+  };
+
   const handleSavePortfolio = async () => {
     setIsSubmittingPortfolio(true);
     try {
@@ -64,10 +89,7 @@ export default function ProjectsSection() {
         docRef,
         {
           about: about.split("\n\n").filter((p) => p.trim() !== ""),
-          skills: skills
-            .split(",")
-            .map((s) => s.trim())
-            .filter((s) => s !== ""),
+          skills: skills,
         },
         { merge: true },
       );
@@ -142,12 +164,12 @@ export default function ProjectsSection() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="bg-card rounded-xl border border-border p-6 space-y-4 shadow-sm">
             <label className="text-xs font-bold uppercase text-muted-foreground block">
-              About Me (Bio)
+              About Me
             </label>
             <textarea
               value={about}
               onChange={(e) => setAbout(e.target.value)}
-              className="w-full h-48 px-4 py-3 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:outline-none resize-none text-sm leading-relaxed"
+              className="w-full h-64 px-4 py-3 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:outline-none resize-none text-sm leading-relaxed"
               placeholder="Separate paragraphs with double newlines..."
             />
             <div className="pt-2">
@@ -164,14 +186,72 @@ export default function ProjectsSection() {
 
           <div className="bg-card rounded-xl border border-border p-6 space-y-4 shadow-sm h-full flex flex-col">
             <label className="text-xs font-bold uppercase text-muted-foreground block">
-              Skills (Comma Separated)
+              Skills & Expertise
             </label>
-            <textarea
-              value={skills}
-              onChange={(e) => setSkills(e.target.value)}
-              className="w-full flex-1 px-4 py-3 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:outline-none resize-none text-sm leading-relaxed"
-              placeholder="React, Next.js, TypeScript..."
-            />
+            
+            <div className="flex-1 flex flex-col gap-4">
+              <div className="flex flex-wrap gap-2">
+                <input
+                  type="text"
+                  value={newSkill}
+                  onChange={(e) => setNewSkill(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleAddSkill()}
+                  className="flex-1 px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:outline-none"
+                  placeholder="Type a skill and press Enter..."
+                />
+                <button
+                  onClick={handleAddSkill}
+                  className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors shadow-sm font-medium"
+                >
+                  Add
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar">
+                {skills.length > 0 ? (
+                  skills.map((skill, idx) => (
+                    <div
+                      key={idx}
+                      className="group p-3 bg-secondary/30 border border-border rounded-lg flex flex-col gap-2 hover:border-primary/50 transition-all shadow-sm"
+                    >
+                      <div className="flex items-center justify-between gap-1">
+                        <span className="text-sm font-medium text-foreground truncate">{skill}</span>
+                        <button
+                          onClick={() => handleRemoveSkill(skill)}
+                          className="p-1 hover:text-destructive transition-colors opacity-0 group-hover:opacity-100"
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                      <div className="flex justify-between items-center opacity-0 group-hover:opacity-100 transition-all pt-1 border-t border-border/50">
+                        <div className="flex gap-1">
+                          <button
+                            onClick={() => handleReorderSkill(idx, "left")}
+                            disabled={idx === 0}
+                            className="p-1 hover:bg-muted rounded text-muted-foreground disabled:opacity-30"
+                          >
+                            <ArrowLeft size={14} />
+                          </button>
+                          <button
+                            onClick={() => handleReorderSkill(idx, "right")}
+                            disabled={idx === skills.length - 1}
+                            className="p-1 hover:bg-muted rounded text-muted-foreground disabled:opacity-30"
+                          >
+                            <ArrowRight size={14} />
+                          </button>
+                        </div>
+                        <span className="text-[10px] text-muted-foreground uppercase font-bold">#{idx + 1}</span>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="col-span-2 py-8 text-center text-muted-foreground italic text-sm border-2 border-dashed border-border rounded-xl">
+                    No skills added yet. Break it down!
+                  </div>
+                )}
+              </div>
+            </div>
+
             <div className="pt-2">
               <button
                 onClick={handleSavePortfolio}

@@ -170,6 +170,10 @@ export default function SingleFieldStep({
       }
     } else if (type === "number") {
       processedValue = newValue.replace(/[^0-9]/g, "");
+      // Prevent leading zeros unless the value is just "0"
+      if (processedValue.length > 1 && processedValue.startsWith("0")) {
+        processedValue = processedValue.replace(/^0+/, "");
+      }
     } else if (type === "phone") {
       let clean = newValue.replace(/[^\d]/g, "");
       if (clean.length > 11) clean = clean.substring(0, 11);
@@ -423,6 +427,21 @@ export default function SingleFieldStep({
           value={localValue}
           onChange={handleChange}
           onComplete={validateAndComplete}
+        />
+      );
+    }
+
+    if (type === "number") {
+      return (
+        <input
+          ref={inputRef}
+          type="text"
+          inputMode="numeric"
+          value={localValue === "Skip" ? "" : localValue}
+          onChange={(e) => handleChange(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder={placeholder}
+          className="input-field text-center font-mono"
         />
       );
     }

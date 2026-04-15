@@ -64,18 +64,29 @@ export const useProjects = () => {
 
     if (otherIndex < 0 || otherIndex >= newProjects.length) return;
 
-    const batch = writeBatch(db);
-    
-    const p1 = newProjects[index];
-    const p2 = newProjects[otherIndex];
+    try {
+      const batch = writeBatch(db);
+      
+      const p1 = newProjects[index];
+      const p2 = newProjects[otherIndex];
 
-    const ref1 = doc(db, "projects", p1.id!);
-    const ref2 = doc(db, "projects", p2.id!);
+      if (!p1.id || !p2.id) {
+        throw new Error("Missing project IDs for reordering");
+      }
 
-    batch.update(ref1, { index: p2.index });
-    batch.update(ref2, { index: p1.index });
+      const ref1 = doc(db, "projects", p1.id);
+      const ref2 = doc(db, "projects", p2.id);
 
-    await batch.commit();
+      // Swap the index values
+      batch.update(ref1, { index: p2.index });
+      batch.update(ref2, { index: p1.index });
+
+      await batch.commit();
+      console.log(`Reordered projects ${p1.title} and ${p2.title}`);
+    } catch (error) {
+      console.error("Failed to reorder projects:", error);
+      throw error;
+    }
   };
 
   return { projects, loading, addProject, updateProject, deleteProject, reorderProject };

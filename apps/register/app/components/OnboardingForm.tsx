@@ -54,6 +54,10 @@ export default function OnboardingForm({
     // Logic to skip payment structure if budget is skipped
     if (steps[currentStep].kind === "field" && steps[currentStep].id === "budget") {
       if (formData.fields["budget"] === "Skip") {
+        setFormData((prev) => ({
+          ...prev,
+          answers: { ...prev.answers, "payment-structure": "Skip" },
+        }));
         if (nextStep < totalSteps - 1) {
           nextStep += 1; // Skip "payment-structure"
         }
