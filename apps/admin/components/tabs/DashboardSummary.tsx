@@ -66,14 +66,6 @@ export default function DashboardSummary({
   }
 
   const totalUsers = users.length;
-  const unconfirmedUsers = users.filter(
-    (u) => !u.status || u.status.trim() === "",
-  ).length;
-
-  const completedPayments = payments.filter((p) => {
-    const status = (p.status || "").toLowerCase().trim();
-    return status === "completed";
-  }).length;
   const totalRevenue = payments.reduce((sum, p) => {
     const status = (p.status || "").toLowerCase().trim();
     if (status === "completed") {
@@ -126,28 +118,24 @@ export default function DashboardSummary({
       value: totalUsers,
       icon: Users,
       color: "bg-primary/10 text-primary",
-      change: `${unconfirmedUsers} Unconfirmed`,
     },
     {
       title: "Total Revenue",
       value: `₦${totalRevenue.toLocaleString()}`,
       icon: TrendingUp,
       color: "bg-success/10 text-success",
-      change: `${completedPayments} Completed`,
     },
     {
       title: "Active Events",
       value: visibleEvents,
       icon: Calendar,
       color: "bg-accent/10 text-accent-foreground",
-      change: `${events.length} Total`,
     },
     {
       title: "Announcements",
       value: visibleAnnouncements,
       icon: Megaphone,
       color: "bg-warning/10 text-warning",
-      change: `${announcements.length} Total`,
     },
   ];
 
@@ -170,7 +158,6 @@ export default function DashboardSummary({
             <p className="text-2xl font-bold text-foreground mb-1">
               {stat.value}
             </p>
-            <p className="text-xs text-muted-foreground">{stat.change}</p>
           </div>
         ))}
       </div>

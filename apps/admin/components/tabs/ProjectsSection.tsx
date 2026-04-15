@@ -14,7 +14,6 @@ import {
   Save,
   X,
   User as UserIcon,
-  Award,
 } from "lucide-react";
 import { useProjects, Project } from "@/hooks/useProjects";
 import { doc, onSnapshot, setDoc } from "firebase/firestore";
@@ -243,7 +242,7 @@ export default function ProjectsSection() {
                           <X size={14} />
                         </button>
                       </div>
-                      <div className="flex justify-between items-center opacity-0 group-hover:opacity-100 transition-all pt-1 border-t border-border/50">
+                      <div className="flex justify-between items-center opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-all pt-1 border-t border-border/50">
                         <div className="flex gap-1">
                           <button
                             onClick={() => handleReorderSkill(idx, "left")}
@@ -286,7 +285,7 @@ export default function ProjectsSection() {
         </div>
       </div>
 
-      <div className="space-y-6 flex justify-between items-center gap-4 flex-wrap">
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-6">
         <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
           <Briefcase className="text-primary" />
           Projects
@@ -300,7 +299,7 @@ export default function ProjectsSection() {
         </button>
       </div>
 
-      <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
+      <div className="bg-card rounded-xl border border-border shadow-sm overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-muted/50 border-b border-border">
