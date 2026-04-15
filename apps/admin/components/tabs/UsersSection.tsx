@@ -5,6 +5,7 @@ import { Search, ArrowUpDown, Plus } from "lucide-react";
 import { User } from "@ayasemota/types";
 import { TableSkeleton } from "@/components/Skeleton";
 import Modal from "@/components/Modal";
+import { useToast } from "../ToastContext";
 
 interface UsersSectionProps {
   users: User[];
@@ -34,6 +35,7 @@ export default function UsersSection({
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [showAddUserForm, setShowAddUserForm] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const { showToast } = useToast();
   const [newUser, setNewUser] = useState<Partial<User>>({
     firstName: "",
     lastName: "",
@@ -45,9 +47,34 @@ export default function UsersSection({
 
   const handleAddUser = async () => {
     if (!newUser.email) return;
+
+    // Validation: Check for unique email, phone, and pin
+    const emailConflict = users.find(u => u.email.toLowerCase() === newUser.email?.toLowerCase());
+    if (emailConflict) {
+      showToast("Email is already in use by another user");
+      return;
+    }
+
+    if (newUser.phone) {
+      const phoneConflict = users.find(u => u.phone === newUser.phone);
+      if (phoneConflict) {
+        showToast("Phone number is already in use");
+        return;
+      }
+    }
+
+    if (newUser.pin) {
+      const pinConflict = users.find(u => u.pin === newUser.pin);
+      if (pinConflict) {
+        showToast("This PIN is already in use");
+        return;
+      }
+    }
+
     setIsSaving(true);
     try {
       await onAddUser(newUser);
+      showToast("User added successfully");
       setNewUser({
         firstName: "",
         lastName: "",
@@ -59,6 +86,7 @@ export default function UsersSection({
       setShowAddUserForm(false);
     } catch (error) {
       console.error("Error adding user:", error);
+      showToast("Failed to add user");
     } finally {
       setIsSaving(false);
     }
@@ -204,14 +232,13 @@ export default function UsersSection({
             onChange={(e) => setNewUser({ ...newUser, pin: e.target.value })}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
-          <select
+          <input
+            type="text"
+            placeholder="Status"
             value={newUser.status || ""}
             onChange={(e) => setNewUser({ ...newUser, status: e.target.value })}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="Confirmed">Confirmed</option>
-            <option value="Unconfirmed">Unconfirmed</option>
-          </select>
+          />
           <div className="flex flex-col sm:flex-row gap-2 pt-4">
             <button
               onClick={handleAddUser}

@@ -1,4 +1,4 @@
-import { Home, CreditCard, HelpCircle, Settings, LogOut, Lock } from "lucide-react";
+import { Home, CreditCard, HelpCircle, Settings, LogOut, Lock, GraduationCap } from "lucide-react";
 
 interface SidebarProps {
   currentPage: string;
@@ -46,6 +46,18 @@ export const Sidebar = ({
           >
             <Home size={20} />
             <span>Dashboard</span>
+          </button>
+
+          <button
+            onClick={() => handleNavigate("class")}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg ${
+              currentPage === "class"
+                ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                : "text-gray-400 hover:bg-gray-800/50 hover:text-white"
+            }`}
+          >
+            <GraduationCap size={20} />
+            <span>Class</span>
           </button>
 
           <button

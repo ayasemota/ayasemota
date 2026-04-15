@@ -105,6 +105,7 @@ export default function UserDetailModal({
         pin: editedUser.pin || "",
         status: editedUser.status || "",
         unclearedAmount: unclearedAmount,
+        classLink: editedUser.classLink || "",
       };
       await onUserUpdate(user.id, newValues);
       setEditedUser((prev) => (prev ? { ...prev, ...newValues } : prev));
@@ -239,6 +240,7 @@ export default function UserDetailModal({
               />
             </div>
 
+
             {/* Registration Details Accordion */}
             <div className="pt-4 border-t border-gray-200 mt-4">
               <button
@@ -331,6 +333,20 @@ export default function UserDetailModal({
 
           </div>
 
+          <div className="space-y-2 mt-4">
+              <label className="text-xs font-bold uppercase text-muted-foreground flex items-center gap-2">
+                Telegram Class Link
+              </label>
+              <input
+                type="text"
+                value={editedUser.classLink || ""}
+                onChange={(e) => handleFieldChange("classLink", e.target.value)}
+                onBlur={handleSave}
+                placeholder="https://t.me/..."
+                className="w-full px-4 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-primary focus:outline-none"
+              />
+          </div>
+          
           <div>
             <div className="flex items-center justify-between mb-4">
               <h4 className="text-base md:text-lg font-semibold text-gray-900">
@@ -410,6 +426,7 @@ export default function UserDetailModal({
                 </table>
               </div>
             </div>
+
           </div>
         </div>
       </Modal>

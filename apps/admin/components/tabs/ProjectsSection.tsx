@@ -1,12 +1,56 @@
 "use client";
 
-import { useState } from "react";
-import { Plus, Briefcase, ExternalLink, Edit2, Trash2, ArrowUp, ArrowDown, Save, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Plus, Briefcase, ExternalLink, Edit2, Trash2, ArrowUp, ArrowDown, Save, X, User as UserIcon, Award } from "lucide-react";
 import { useProjects, Project } from "@/hooks/useProjects";
+import { doc, onSnapshot, setDoc } from "firebase/firestore";
+import { db } from "@ayasemota/firebase";
+import { useToast } from "../ToastContext";
 
 export default function ProjectsSection() {
   const { projects, loading, addProject, updateProject, deleteProject, reorderProject } = useProjects();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { showToast } = useToast();
+  
+  const [about, setAbout] = useState("");
+  const [skills, setSkills] = useState("");
+  const [isSubmittingPortfolio, setIsSubmittingPortfolio] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  useEffect(() => {
+    const docRef = doc(db, "settings", "portfolio");
+    const unsubscribe = onSnapshot(docRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const d = snapshot.data();
+        // Only initialize state if we haven't already or if we aren't currently submitting
+        if (!isInitialized) {
+          setAbout(Array.isArray(d.about) ? d.about.join("\n\n") : (d.about || ""));
+          setSkills(Array.isArray(d.skills) ? d.skills.join(", ") : "");
+          setIsInitialized(true);
+        }
+      } else {
+        setIsInitialized(true);
+      }
+    });
+    return () => unsubscribe();
+  }, [isInitialized]);
+
+  const handleSavePortfolio = async () => {
+    setIsSubmittingPortfolio(true);
+    try {
+      const docRef = doc(db, "settings", "portfolio");
+      await setDoc(docRef, {
+        about: about.split("\n\n").filter(p => p.trim() !== ""),
+        skills: skills.split(",").map(s => s.trim()).filter(s => s !== "")
+      }, { merge: true });
+      showToast("Portfolio Identity synched successfully!");
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to save portfolio settings");
+    } finally {
+      setIsSubmittingPortfolio(false);
+    }
+  };
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [formData, setFormData] = useState<Omit<Project, "id" | "index">>({
     title: "",
@@ -59,11 +103,61 @@ export default function ProjectsSection() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-12">
+      {/* Portfolio Settings Section */}
+      <div className="space-y-6">
+        <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
+          <UserIcon className="text-primary" />
+          Identity
+        </h2>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-card rounded-xl border border-border p-6 space-y-4 shadow-sm">
+            <label className="text-xs font-bold uppercase text-muted-foreground block">About Me (Bio)</label>
+            <textarea
+              value={about}
+              onChange={(e) => setAbout(e.target.value)}
+              className="w-full h-48 px-4 py-3 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:outline-none resize-none text-sm leading-relaxed"
+              placeholder="Separate paragraphs with double newlines..."
+            />
+            <div className="pt-2">
+              <button
+                onClick={handleSavePortfolio}
+                disabled={isSubmittingPortfolio}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors shadow-sm font-medium disabled:opacity-50"
+              >
+                <Save size={18} />
+                {isSubmittingPortfolio ? "Saving..." : "Save Bio"}
+              </button>
+            </div>
+          </div>
+          
+          <div className="bg-card rounded-xl border border-border p-6 space-y-4 shadow-sm h-full flex flex-col">
+            <label className="text-xs font-bold uppercase text-muted-foreground block">Skills (Comma Separated)</label>
+            <textarea
+              value={skills}
+              onChange={(e) => setSkills(e.target.value)}
+              className="w-full flex-1 px-4 py-3 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:outline-none resize-none text-sm leading-relaxed"
+              placeholder="React, Next.js, TypeScript..."
+            />
+            <div className="pt-2">
+              <button
+                onClick={handleSavePortfolio}
+                disabled={isSubmittingPortfolio}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors shadow-sm font-medium disabled:opacity-50"
+              >
+                <Save size={18} />
+                {isSubmittingPortfolio ? "Saving..." : "Save Skills"}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-6 flex justify-between items-center gap-4 flex-wrap">
         <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
           <Briefcase className="text-primary" />
-          Portfolio Projects
+          Projects
         </h2>
         <button
           onClick={handleOpenAdd}

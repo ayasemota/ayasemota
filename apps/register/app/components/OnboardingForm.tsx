@@ -49,12 +49,23 @@ export default function OnboardingForm({
   );
 
   const handleStepComplete = useCallback(() => {
+    let nextStep = currentStep + 1;
+
+    // Logic to skip payment structure if budget is skipped
+    if (steps[currentStep].kind === "field" && steps[currentStep].id === "budget") {
+      if (formData.fields["budget"] === "Skip") {
+        if (nextStep < totalSteps - 1) {
+          nextStep += 1; // Skip "payment-structure"
+        }
+      }
+    }
+
     if (currentStep < totalSteps - 1) {
-      setCurrentStep((prev) => prev + 1);
+      setCurrentStep(nextStep);
     } else {
       onComplete(formData);
     }
-  }, [currentStep, totalSteps, formData, onComplete]);
+  }, [currentStep, totalSteps, formData, onComplete, steps]);
 
   const handleBack = useCallback(() => {
     if (currentStep > 0) {

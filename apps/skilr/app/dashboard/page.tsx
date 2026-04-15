@@ -9,6 +9,7 @@ import { usePublicAnnouncements } from "@/hooks/usePublicAnnouncements";
 import { usePublicEvents } from "@/hooks/usePublicEvents";
 import { Sidebar } from "@/components/Sidebar";
 import { DashboardPage } from "@/components/pages/DashboardPage";
+import { ClassPage } from "@/components/pages/ClassPage";
 import { PaymentsPage } from "@/components/pages/PaymentsPage";
 import { HelpPage } from "@/components/pages/HelpPage";
 import { SettingsPage } from "@/components/pages/SettingsPage";
@@ -47,8 +48,8 @@ export default function Dashboard() {
 
   useEffect(() => {
     const hash = window.location.hash.slice(1);
-    if (hash && ["dashboard", "payments", "help", "settings"].includes(hash)) {
-      if (isRestricted && hash === "payments") {
+    if (hash && ["dashboard", "payments", "help", "settings", "class"].includes(hash)) {
+      if (isRestricted && (hash === "payments" || hash === "class")) {
         setCurrentPage("dashboard");
         window.location.hash = "dashboard";
       } else {
@@ -138,6 +139,7 @@ export default function Dashboard() {
                 isRestricted={isRestricted}
               />
             )}
+            {currentPage === "class" && <ClassPage user={user} />}
             {currentPage === "payments" && (
               <PaymentsPage
                 user={user}

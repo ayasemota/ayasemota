@@ -71,6 +71,7 @@ export const useUsers = () => {
             skillLevel: data.skillLevel || "",
             budget: data.budget || "",
             paymentStructure: data.paymentStructure || "",
+            classLink: data.classLink || "",
             createdAt: data.createdAt,
           };
         });

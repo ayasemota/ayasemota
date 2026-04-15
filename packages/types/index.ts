@@ -14,6 +14,7 @@ export interface User {
   skillLevel?: string;
   budget?: string;
   paymentStructure?: string;
+  classLink?: string;
   createdAt?: Timestamp;
 }
 

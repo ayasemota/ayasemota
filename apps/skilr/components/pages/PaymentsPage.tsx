@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { User as UserIcon, Mail, Phone } from "lucide-react";
+import { User as UserIcon, Mail, Phone, Copy, CheckCheck } from "lucide-react";
 import { Timestamp } from "firebase/firestore";
 import { User as UserType, Payment, PaystackResponse } from "@ayasemota/types";
 import { PAYSTACK_PUBLIC_KEY, convertToKobo } from "@ayasemota/paystack";
@@ -74,6 +74,13 @@ export const PaymentsPage = ({
         setPaymentAmount(rawValue);
       }
     }
+  };
+
+  const [copiedRef, setCopiedRef] = useState<string | null>(null);
+  const handleCopy = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedRef(text);
+    setTimeout(() => setCopiedRef(null), 2000);
   };
 
   const stats = useMemo(() => {
@@ -422,7 +429,25 @@ export const PaymentsPage = ({
                       ₦{formatCurrency(payment.amount)}
                     </td>
                     <td className="py-4 px-4 text-gray-400 text-xs">
-                      {payment.reference || "N/A"}
+                      <div className="flex items-center gap-2">
+                        <span className="truncate max-w-[120px]">{payment.reference || "N/A"}</span>
+                        {payment.reference && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleCopy(payment.reference!);
+                            }}
+                            className="p-1 hover:bg-gray-700/50 rounded transition-colors text-gray-500 hover:text-blue-400"
+                            title="Copy Reference"
+                          >
+                            {copiedRef === payment.reference ? (
+                              <CheckCheck size={14} className="text-green-400" />
+                            ) : (
+                              <Copy size={14} />
+                            )}
+                          </button>
+                        )}
+                      </div>
                     </td>
                     <td className="py-4 px-4">
                       <span

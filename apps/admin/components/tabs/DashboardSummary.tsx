@@ -325,13 +325,12 @@ export default function DashboardSummary({
                 onChange={(e) =>
                   setLocalSettings({
                     ...localSettings,
-                    vatRate: parseFloat(e.target.value) || 0,
+                    vatRate: parseFloat(e.target.value),
                   })
                 }
                 className="w-full px-3 py-2 bg-background border border-input rounded-md focus:ring-2 focus:ring-primary focus:outline-none"
                 placeholder="e.g. 4"
               />
-              <p className="text-xs text-muted-foreground mt-1">If 0, the VAT row will hide on Skilr.</p>
             </div>
             <div>
               <label className="text-xs font-medium text-muted-foreground uppercase block mb-2">
@@ -343,7 +342,7 @@ export default function DashboardSummary({
                 onChange={(e) =>
                   setLocalSettings({
                     ...localSettings,
-                    transactionFee: parseFloat(e.target.value) || 0,
+                    transactionFee: parseFloat(e.target.value),
                   })
                 }
                 className="w-full px-3 py-2 bg-background border border-input rounded-md focus:ring-2 focus:ring-primary focus:outline-none"
