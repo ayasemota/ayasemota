@@ -16,7 +16,11 @@ interface SingleFieldStepProps {
 }
 
 function capitalizeFirstLetter(str: string): string {
-  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+  if (!str) return "";
+  return str
+    .split(/\s+/)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
 }
 
 function formatNumber(value: string): string {
@@ -176,6 +180,12 @@ export default function SingleFieldStep({
     onChange(processedValue);
   };
 
+  const handleNotSure = () => {
+    setLocalValue("Not sure");
+    onChange("Not sure");
+    onComplete();
+  };
+
   const validateAndComplete = useCallback(async () => {
     if (!localValue.trim()) return;
 
@@ -290,7 +300,7 @@ export default function SingleFieldStep({
       }
     }
 
-    if (type === "number" && minValue) {
+    if (type === "number" && minValue && localValue !== "Not sure") {
       const numValue = parseNumber(localValue);
       if (numValue < minValue) {
         setError(`Minimum amount is ${minValue.toLocaleString("en-US")}`);
@@ -420,6 +430,17 @@ export default function SingleFieldStep({
           <p className="text-red-400 text-sm text-center animate-fade-in">
             {error}
           </p>
+        )}
+
+        {(placeholder === "Enter amount" || label.toLowerCase().includes("investing")) && !localValue && (
+          <div className="text-center animate-fade-in">
+            <button
+              onClick={handleNotSure}
+              className="px-6 py-2 rounded-full border border-white/20 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white transition-all text-sm font-medium"
+            >
+              Not sure / Skip
+            </button>
+          </div>
         )}
 
         {localValue.trim() && !autoAdvance && !error && (

@@ -90,7 +90,7 @@ export const allSteps: StepType[] = [
     kind: "field",
     id: "budget",
     label: "How much are you investing?",
-    placeholder: "Minimum: 200000 NGN",
+    placeholder: "Enter amount",
     type: "number",
   },
   {

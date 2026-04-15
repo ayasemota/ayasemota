@@ -8,6 +8,7 @@ import {
   Calendar,
   Megaphone,
   LayoutDashboard,
+  Briefcase,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -46,6 +47,7 @@ export default function Sidebar({
     { id: "payments", label: "Payments", icon: CreditCard },
     { id: "events", label: "Events", icon: Calendar },
     { id: "announcements", label: "Announcements", icon: Megaphone },
+    { id: "projects", label: "Portfolio", icon: Briefcase },
   ];
 
   return (

@@ -12,6 +12,7 @@ import UsersSection from "@/components/tabs/UsersSection";
 import PaymentsSection from "@/components/tabs/PaymentsSection";
 import EventsSection from "@/components/tabs/EventsSection";
 import AnnouncementsSection from "@/components/tabs/AnnouncementsSection";
+import ProjectsSection from "@/components/tabs/ProjectsSection";
 import UserDetailModal from "@/components/UserDetailModal";
 import PaymentDetailModal from "@/components/PaymentDetailModal";
 import { useUsers } from "@/hooks/useUsers";
@@ -30,6 +31,7 @@ const pageTitles: Record<string, string> = {
   payments: "Payments",
   events: "Events Management",
   announcements: "Announcements",
+  projects: "Portfolio Management",
 };
 
 function DashboardContent() {
@@ -262,6 +264,8 @@ function DashboardContent() {
               onDeleteAnnouncement={deleteAnnouncement}
             />
           )}
+
+          {activeSection === "projects" && <ProjectsSection />}
         </main>
 
         <Footer />
