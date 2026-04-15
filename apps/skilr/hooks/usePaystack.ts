@@ -1,5 +1,3 @@
-import { useEffect } from "react";
-
 interface PaystackProps {
   email: string;
   amount: number;
@@ -51,21 +49,37 @@ interface PaystackConfig {
   onClose: () => void;
 }
 
+const PAYSTACK_READY_TIMEOUT_MS = 5000;
+const PAYSTACK_POLL_INTERVAL_MS = 100;
+
+const waitForPaystack = (): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    if (typeof window !== "undefined" && window.PaystackPop) {
+      resolve();
+      return;
+    }
+
+    const start = Date.now();
+    const interval = setInterval(() => {
+      if (typeof window !== "undefined" && window.PaystackPop) {
+        clearInterval(interval);
+        resolve();
+      } else if (Date.now() - start >= PAYSTACK_READY_TIMEOUT_MS) {
+        clearInterval(interval);
+        reject(new Error("Paystack script failed to load. Please refresh and try again."));
+      }
+    }, PAYSTACK_POLL_INTERVAL_MS);
+  });
+};
+
 export const usePaystack = () => {
-  useEffect(() => {
-    const script = document.createElement("script");
-    script.src = "https://js.paystack.co/v1/inline.js";
-    script.async = true;
-    document.body.appendChild(script);
-
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, []);
-
-  const initializePayment = (config: PaystackProps) => {
-    if (!window.PaystackPop) {
-      console.error("Paystack script not loaded");
+  const initializePayment = async (config: PaystackProps) => {
+    try {
+      await waitForPaystack();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Paystack unavailable";
+      alert(message);
+      config.onClose();
       return;
     }
 
