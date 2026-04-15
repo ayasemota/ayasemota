@@ -48,19 +48,73 @@ export default function OnboardingForm({
     []
   );
 
-  const handleStepComplete = useCallback(() => {
-    if (currentStep < totalSteps - 1) {
-      setCurrentStep((prev) => prev + 1);
-    } else {
-      onComplete(formData);
-    }
-  }, [currentStep, totalSteps, formData, onComplete]);
+  const handleStepComplete = useCallback(
+    (manualValue?: string) => {
+      let nextStep = currentStep + 1;
+
+      const currentStepObj = steps[currentStep];
+      const actualValue =
+        manualValue ??
+        (currentStepObj.kind === "field"
+          ? formData.fields[currentStepObj.id]
+          : formData.answers[currentStepObj.question.id]);
+
+      if (currentStepObj.kind === "field" && currentStepObj.id === "budget") {
+        if (actualValue === "Skip") {
+          setFormData((prev) => ({
+            ...prev,
+            answers: { ...prev.answers, "payment-structure": "Skip" },
+          }));
+          if (nextStep < totalSteps - 1) {
+            nextStep += 1;
+          }
+        }
+      }
+
+      if (currentStep < totalSteps - 1) {
+        setCurrentStep(nextStep);
+      } else {
+        onComplete(formData);
+      }
+    },
+    [currentStep, totalSteps, formData, onComplete, steps]
+  );
 
   const handleBack = useCallback(() => {
     if (currentStep > 0) {
-      setCurrentStep((prev) => prev - 1);
+      let prevIndex = currentStep - 1;
+      let prevStep = steps[prevIndex];
+
+      if (
+        prevStep.kind === "question" &&
+        prevStep.question.id === "payment-structure" &&
+        formData.fields["budget"] === "Skip"
+      ) {
+        if (prevIndex > 0) {
+          prevIndex -= 1;
+          prevStep = steps[prevIndex];
+        }
+      }
+
+      if (prevStep.kind === "field" && prevStep.id === "budget") {
+        setFormData((prev) => ({
+          ...prev,
+          fields: { ...prev.fields, budget: "" },
+        }));
+      }
+      if (
+        prevStep.kind === "question" &&
+        prevStep.question.id === "payment-structure"
+      ) {
+        setFormData((prev) => ({
+          ...prev,
+          answers: { ...prev.answers, "payment-structure": "" },
+        }));
+      }
+
+      setCurrentStep(prevIndex);
     }
-  }, [currentStep]);
+  }, [currentStep, steps, formData.fields]);
 
   const handleRestart = useCallback(() => {
     onRestart();

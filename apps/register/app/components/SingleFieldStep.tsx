@@ -7,16 +7,28 @@ import { checkUniqueField } from "../lib/firestore";
 interface SingleFieldStepProps {
   label: string;
   placeholder: string;
-  type: "text" | "date" | "name" | "telegram" | "number" | "email" | "phone" | "pin";
+  type:
+    | "text"
+    | "date"
+    | "name"
+    | "telegram"
+    | "number"
+    | "email"
+    | "phone"
+    | "pin";
   value: string;
   onChange: (value: string) => void;
-  onComplete: () => void;
+  onComplete: (value?: string) => void;
   autoAdvance?: boolean;
   minValue?: number;
 }
 
 function capitalizeFirstLetter(str: string): string {
-  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+  if (!str) return "";
+  return str
+    .split(/\s+/)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
 }
 
 function formatNumber(value: string): string {
@@ -39,7 +51,7 @@ const PinInputRenderer = ({
   onComplete: () => void;
 }) => {
   const [digits, setDigits] = useState<string[]>(
-    value.split("").concat(Array(6).fill("")).slice(0, 6)
+    value.split("").concat(Array(6).fill("")).slice(0, 6),
   );
   const inputs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -58,7 +70,10 @@ const PinInputRenderer = ({
     return () => clearTimeout(timer);
   }, []);
 
-  const handleChange = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (
+    index: number,
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const val = e.target.value.replace(/[^0-9]/g, "");
     if (!val && e.target.value !== "") return;
 
@@ -74,7 +89,7 @@ const PinInputRenderer = ({
 
   const handleKeyDown = (
     index: number,
-    e: React.KeyboardEvent<HTMLInputElement>
+    e: React.KeyboardEvent<HTMLInputElement>,
   ) => {
     if (e.key === "Backspace" && !digits[index] && index > 0) {
       inputs.current[index - 1]?.focus();
@@ -154,7 +169,10 @@ export default function SingleFieldStep({
         processedValue = "@" + newValue.replace(/^@+/, "");
       }
     } else if (type === "number") {
-      processedValue = formatNumber(newValue);
+      processedValue = newValue.replace(/[^0-9]/g, "");
+      if (processedValue.length > 1 && processedValue.startsWith("0")) {
+        processedValue = processedValue.replace(/^0+/, "");
+      }
     } else if (type === "phone") {
       let clean = newValue.replace(/[^\d]/g, "");
       if (clean.length > 11) clean = clean.substring(0, 11);
@@ -176,6 +194,12 @@ export default function SingleFieldStep({
     onChange(processedValue);
   };
 
+  const handleSkip = () => {
+    setLocalValue("Skip");
+    onChange("Skip");
+    onComplete("Skip");
+  };
+
   const validateAndComplete = useCallback(async () => {
     if (!localValue.trim()) return;
 
@@ -184,127 +208,141 @@ export default function SingleFieldStep({
     setError("");
 
     try {
+      if (type === "name") {
+        const cleaned = localValue.trim();
+        if (cleaned.length < 2) {
+          setError("Name must be at least 2 characters");
+          return;
+        }
+        if (!/^[a-zA-Z\s'-]+$/.test(cleaned)) {
+          setError("Name can only contain letters");
+          return;
+        }
+      }
 
-    if (type === "name") {
-      const cleaned = localValue.trim();
-      if (cleaned.length < 2) {
-        setError("Name must be at least 2 characters");
-        return;
+      if (type === "date") {
+        const parts = localValue.split("/");
+        if (parts.length !== 3 || localValue.length !== 10) {
+          setError("Please enter date as DD/MM/YYYY");
+          return;
+        }
+        const day = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1;
+        const year = parseInt(parts[2], 10);
+        const selectedDate = new Date(year, month, day);
+
+        if (
+          selectedDate.getDate() !== day ||
+          selectedDate.getMonth() !== month ||
+          selectedDate.getFullYear() !== year
+        ) {
+          setError("Please enter a valid date");
+          return;
+        }
+
+        const minDate = new Date(getMinDate());
+        const maxDate = new Date(getMaxDate());
+        if (selectedDate < minDate || selectedDate > maxDate) {
+          setError("Please enter a valid date of birth");
+          return;
+        }
+        const age = Math.floor(
+          (maxDate.getTime() - selectedDate.getTime()) /
+            (365.25 * 24 * 60 * 60 * 1000),
+        );
+        if (age < 10) {
+          setError("You must be at least 10 years old");
+          return;
+        }
       }
-      if (!/^[a-zA-Z\s'-]+$/.test(cleaned)) {
-        setError("Name can only contain letters");
-        return;
+
+      if (type === "telegram") {
+        if (!localValue.startsWith("@")) {
+          setError("Username must start with @");
+          return;
+        }
+        const username = localValue.slice(1);
+        if (username.length < 5) {
+          setError("Username must be at least 5 characters");
+          return;
+        }
+        if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+          setError(
+            "Username can only contain letters, numbers, and underscores",
+          );
+          return;
+        }
+        const exists = await checkUniqueField(
+          "telegramUsername",
+          localValue.trim(),
+        );
+        if (exists) {
+          setError("This Telegram username is already registered");
+          return;
+        }
       }
+
+      if (type === "email") {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(localValue.trim())) {
+          setError("Please enter a valid email address");
+          return;
+        }
+        const exists = await checkUniqueField(
+          "email",
+          localValue.trim().toLowerCase(),
+        );
+        if (exists) {
+          setError("This email is already registered");
+          return;
+        }
+      }
+
+      if (type === "phone") {
+        if (
+          localValue.trim().length !== 11 ||
+          !/^\d{11}$/.test(localValue.trim())
+        ) {
+          setError("Phone number must be exactly 11 digits");
+          return;
+        }
+        const exists = await checkUniqueField("phone", localValue.trim());
+        if (exists) {
+          setError("This phone number is already registered");
+          return;
+        }
+      }
+
+      if (type === "pin") {
+        if (
+          localValue.trim().length !== 6 ||
+          !/^\d+$/.test(localValue.trim())
+        ) {
+          setError("PIN must be exactly 6 digits");
+          return;
+        }
+        const exists = await checkUniqueField("pin", localValue.trim());
+        if (exists) {
+          setError("This PIN is already in use by another user");
+          return;
+        }
+      }
+
+      if (type === "number" && minValue && localValue !== "Skip") {
+        const numValue = parseNumber(localValue);
+        if (numValue < minValue) {
+          setError(`Minimum amount is ${minValue.toLocaleString("en-US")}`);
+          return;
+        }
+      }
+
+      onComplete(localValue);
+    } catch (err) {
+      console.error(err);
+      setError("An error occurred verifying details.");
+    } finally {
+      setIsChecking(false);
     }
-
-    if (type === "date") {
-      const parts = localValue.split("/");
-      if (parts.length !== 3 || localValue.length !== 10) {
-        setError("Please enter date as DD/MM/YYYY");
-        return;
-      }
-      const day = parseInt(parts[0], 10);
-      const month = parseInt(parts[1], 10) - 1;
-      const year = parseInt(parts[2], 10);
-      const selectedDate = new Date(year, month, day);
-
-      if (
-        selectedDate.getDate() !== day ||
-        selectedDate.getMonth() !== month ||
-        selectedDate.getFullYear() !== year
-      ) {
-        setError("Please enter a valid date");
-        return;
-      }
-
-      const minDate = new Date(getMinDate());
-      const maxDate = new Date(getMaxDate());
-      if (selectedDate < minDate || selectedDate > maxDate) {
-        setError("Please enter a valid date of birth");
-        return;
-      }
-      const age = Math.floor(
-        (maxDate.getTime() - selectedDate.getTime()) / (365.25 * 24 * 60 * 60 * 1000)
-      );
-      if (age < 10) {
-        setError("You must be at least 10 years old");
-        return;
-      }
-    }
-
-    if (type === "telegram") {
-      if (!localValue.startsWith("@")) {
-        setError("Username must start with @");
-        return;
-      }
-      const username = localValue.slice(1);
-      if (username.length < 5) {
-        setError("Username must be at least 5 characters");
-        return;
-      }
-      if (!/^[a-zA-Z0-9_]+$/.test(username)) {
-        setError("Username can only contain letters, numbers, and underscores");
-        return;
-      }
-      const exists = await checkUniqueField("telegramUsername", localValue.trim());
-      if (exists) {
-        setError("This Telegram username is already registered");
-        return;
-      }
-    }
-
-    if (type === "email") {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(localValue.trim())) {
-        setError("Please enter a valid email address");
-        return;
-      }
-      const exists = await checkUniqueField("email", localValue.trim().toLowerCase());
-      if (exists) {
-        setError("This email is already registered");
-        return;
-      }
-    }
-
-    if (type === "phone") {
-      if (localValue.trim().length !== 11 || !/^\d{11}$/.test(localValue.trim())) {
-        setError("Phone number must be exactly 11 digits");
-        return;
-      }
-      const exists = await checkUniqueField("phone", localValue.trim());
-      if (exists) {
-        setError("This phone number is already registered");
-        return;
-      }
-    }
-
-    if (type === "pin") {
-      if (localValue.trim().length !== 6 || !/^\d+$/.test(localValue.trim())) {
-        setError("PIN must be exactly 6 digits");
-        return;
-      }
-      const exists = await checkUniqueField("pin", localValue.trim());
-      if (exists) {
-        setError("This PIN is already in use by another user");
-        return;
-      }
-    }
-
-    if (type === "number" && minValue) {
-      const numValue = parseNumber(localValue);
-      if (numValue < minValue) {
-        setError(`Minimum amount is ${minValue.toLocaleString("en-US")}`);
-        return;
-      }
-    }
-
-    onComplete();
-  } catch (err) {
-    console.error(err);
-    setError("An error occurred verifying details.");
-  } finally {
-    setIsChecking(false);
-  }
   }, [localValue, type, minValue, onComplete, isChecking]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -384,10 +422,25 @@ export default function SingleFieldStep({
 
     if (type === "pin") {
       return (
-        <PinInputRenderer 
+        <PinInputRenderer
           value={localValue}
           onChange={handleChange}
           onComplete={validateAndComplete}
+        />
+      );
+    }
+
+    if (type === "number") {
+      return (
+        <input
+          ref={inputRef}
+          type="text"
+          inputMode="numeric"
+          value={localValue === "Skip" ? "" : localValue}
+          onChange={(e) => handleChange(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder={placeholder}
+          className="input-field text-center font-mono"
         />
       );
     }
@@ -422,6 +475,19 @@ export default function SingleFieldStep({
           </p>
         )}
 
+        {(placeholder === "Enter amount" ||
+          label.toLowerCase().includes("investing")) &&
+          !localValue && (
+            <div className="text-center animate-fade-in">
+              <button
+                onClick={handleSkip}
+                className="px-6 py-2 rounded-full border border-white/20 bg-white/5 text-white/70 hover:bg-white/10 hover:text-white transition-all text-sm font-medium"
+              >
+                Skip
+              </button>
+            </div>
+          )}
+
         {localValue.trim() && !autoAdvance && !error && (
           <div className="text-center animate-fade-in">
             <button
@@ -429,7 +495,9 @@ export default function SingleFieldStep({
               disabled={isChecking}
               className="text-white/50 text-sm hover:text-white/70 transition-colors disabled:opacity-50"
             >
-              {isChecking ? "Checking..." : (
+              {isChecking ? (
+                "Checking..."
+              ) : (
                 <>
                   Click Here{" "}
                   <span className="border border-solid border-white/50 p-[0.5px] rounded-sm mx-1">

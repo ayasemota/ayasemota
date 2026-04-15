@@ -34,7 +34,7 @@ export default function AddPaymentModal({
   onAddPayment,
   onDeletePayment,
 }: AddPaymentModalProps) {
-  const { addAction } = useToast();
+  const { showToast } = useToast();
   const [amount, setAmount] = useState("");
   const [status, setStatus] = useState("Completed");
   const [reference, setReference] = useState("");
@@ -77,14 +77,8 @@ export default function AddPaymentModal({
 
       const newId = await onAddPayment(paymentData);
 
-      if (newId && typeof newId === "string") {
-        addAction(
-          "Create Payment",
-          () => onDeletePayment(newId),
-          async () => {
-            await onAddPayment({ ...paymentData }, newId);
-          },
-        );
+      if (newId) {
+        showToast("Payment created successfully");
       }
 
       setAmount("");

@@ -9,6 +9,12 @@ export interface User {
   pin?: string;
   status?: string;
   unclearedAmount?: number;
+  dateOfBirth?: string;
+  telegramUsername?: string;
+  skillLevel?: string;
+  budget?: string;
+  paymentStructure?: string;
+  classLink?: string;
   createdAt?: Timestamp;
 }
 

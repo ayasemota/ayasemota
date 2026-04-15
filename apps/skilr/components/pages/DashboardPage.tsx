@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { User, Payment } from "@ayasemota/types";
-import { X, Calendar, Megaphone } from "lucide-react";
+import { X, Calendar, Megaphone, Lock } from "lucide-react";
 
 interface DashboardPageProps {
   user: User;
@@ -16,7 +16,19 @@ interface DashboardPageProps {
     description: string;
     date?: string;
   }[];
+  isRestricted?: boolean;
 }
+
+const RestrictedOverlay = ({ message = "Restricted Access" }: { message?: string }) => (
+  <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center p-4 text-center rounded-2xl border border-gray-700/50">
+    <div className="w-12 h-12 bg-gray-800 rounded-full flex items-center justify-center mb-3 shadow-xl border border-gray-700">
+      <Lock className="text-gray-500" size={24} />
+    </div>
+    <p className="text-gray-300 font-medium text-sm leading-relaxed max-w-[200px]">
+      {message}
+    </p>
+  </div>
+);
 
 const formatCurrency = (amount: number) => {
   return amount.toLocaleString("en-NG", {
@@ -90,6 +102,7 @@ export const DashboardPage = ({
   onShowUnavailable,
   announcements = [],
   upcomingEvents = [],
+  isRestricted = false,
 }: DashboardPageProps) => {
   const [showAllEvents, setShowAllEvents] = useState(false);
   const [showAllAnnouncements, setShowAllAnnouncements] = useState(false);
@@ -109,7 +122,7 @@ export const DashboardPage = ({
   };
 
   const quickLinks = [
-    { label: "Make Payment", onClick: onNavigateToPayments },
+    { label: "Make Payment", onClick: onNavigateToPayments, disabled: isRestricted },
     { label: "Edit Profile", onClick: onNavigateToProfile },
     { label: "Settings", onClick: onNavigateToProfile },
   ];
@@ -124,7 +137,8 @@ export const DashboardPage = ({
         </div>
 
         <div className="flex flex-col lg:flex-row gap-6">
-          <div className="flex-1 w-full bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6 flex flex-col">
+          <div className="flex-1 w-full bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6 flex flex-col relative overflow-hidden">
+            {isRestricted && <RestrictedOverlay />}
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Calendar className="text-blue-400" size={20} />
@@ -132,7 +146,7 @@ export const DashboardPage = ({
                   Upcoming Events
                 </h2>
               </div>
-              {upcomingEvents.length > 3 && (
+              {upcomingEvents.length > 3 && !isRestricted && (
                 <button
                   onClick={() => setShowAllEvents(true)}
                   className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
@@ -146,8 +160,8 @@ export const DashboardPage = ({
                 {displayEvents.map((event, index) => (
                   <div
                     key={event.id || index}
-                    className="p-4 bg-gray-900/50 rounded-lg border border-gray-700/30 hover:border-blue-500/30 transition-colors duration-300 cursor-pointer"
-                    onClick={() => setSelectedEvent(event)}
+                    className={`p-4 bg-gray-900/50 rounded-lg border border-gray-700/30 transition-colors duration-300 ${!isRestricted ? 'hover:border-blue-500/30 cursor-pointer' : 'opacity-40'}`}
+                    onClick={() => !isRestricted && setSelectedEvent(event)}
                   >
                     <h3 className="font-medium text-white mb-1">
                       {event.title}
@@ -168,7 +182,8 @@ export const DashboardPage = ({
             )}
           </div>
 
-          <div className="flex-1 w-full bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6 flex flex-col">
+          <div className="flex-1 w-full bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6 flex flex-col relative overflow-hidden">
+            {isRestricted && <RestrictedOverlay />}
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Megaphone className="text-purple-400" size={20} />
@@ -176,7 +191,7 @@ export const DashboardPage = ({
                   Announcements
                 </h2>
               </div>
-              {announcements.length > 3 && (
+              {announcements.length > 3 && !isRestricted && (
                 <button
                   onClick={() => setShowAllAnnouncements(true)}
                   className="text-sm text-purple-400 hover:text-purple-300 transition-colors"
@@ -190,8 +205,8 @@ export const DashboardPage = ({
                 {displayAnnouncements.map((item, index) => (
                   <div
                     key={item.id || index}
-                    className="p-3 bg-gray-900/50 rounded-lg border border-gray-700/30 hover:border-purple-500/30 transition-colors duration-300 cursor-pointer"
-                    onClick={() => setSelectedAnnouncement(item)}
+                    className={`p-3 bg-gray-900/50 rounded-lg border border-gray-700/30 transition-colors duration-300 ${!isRestricted ? 'hover:border-purple-500/30 cursor-pointer' : 'opacity-40'}`}
+                    onClick={() => !isRestricted && setSelectedAnnouncement(item)}
                   >
                     <h3 className="text-sm font-medium text-white mb-1">
                       {item.title}
@@ -210,17 +225,20 @@ export const DashboardPage = ({
           </div>
         </div>
 
-        <div className="bg-gray-800/50 border border-gray-700/50 rounded-2xl p-6">
+        <div className="bg-gray-800/50 border border-gray-700/50 rounded-2xl p-6 relative overflow-hidden">
+          {isRestricted && <RestrictedOverlay />}
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold text-white">
               Recent Payments
             </h2>
-            <button
-              onClick={onNavigateToPayments}
-              className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
-            >
-              View All
-            </button>
+            {!isRestricted && (
+              <button
+                onClick={onNavigateToPayments}
+                className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
+              >
+                View All
+              </button>
+            )}
           </div>
           {paymentsLoading ? (
             <div className="flex justify-center py-6">
@@ -242,7 +260,7 @@ export const DashboardPage = ({
                     {recentPayments.map((payment) => (
                       <tr
                         key={payment.id}
-                        className="border-b border-gray-700/10 hover:bg-gray-700/10 transition-colors duration-300"
+                        className={`border-b border-gray-700/10 transition-colors duration-300 ${!isRestricted ? 'hover:bg-gray-700/10' : ''}`}
                       >
                         <td className="py-4 px-4 text-gray-300">{getPaymentDateTime(payment)}</td>
                         <td className="py-4 px-4 text-white font-medium">₦{formatCurrency(payment.amount)}</td>
@@ -312,9 +330,17 @@ export const DashboardPage = ({
               <button
                 key={index}
                 onClick={link.onClick}
-                className="py-6 rounded-xl font-semibold text-white bg-gray-800/60 hover:bg-gray-700/60 border border-gray-700/50 transition-all duration-300"
+                disabled={(link as any).disabled}
+                className={`py-6 rounded-xl font-semibold transition-all duration-300 border ${
+                  (link as any).disabled
+                    ? "bg-gray-800/20 text-gray-600 border-transparent cursor-not-allowed"
+                    : "text-white bg-gray-800/60 hover:bg-gray-700/60 border-gray-700/50"
+                }`}
               >
-                {link.label}
+                <div className="flex items-center justify-center gap-2">
+                  <span>{link.label}</span>
+                  {(link as any).disabled && <Lock size={14} className="text-gray-700" />}
+                </div>
               </button>
             ))}
           </div>

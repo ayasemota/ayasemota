@@ -12,6 +12,7 @@ import UsersSection from "@/components/tabs/UsersSection";
 import PaymentsSection from "@/components/tabs/PaymentsSection";
 import EventsSection from "@/components/tabs/EventsSection";
 import AnnouncementsSection from "@/components/tabs/AnnouncementsSection";
+import ProjectsSection from "@/components/tabs/ProjectsSection";
 import UserDetailModal from "@/components/UserDetailModal";
 import PaymentDetailModal from "@/components/PaymentDetailModal";
 import { useUsers } from "@/hooks/useUsers";
@@ -22,6 +23,7 @@ import { useInactivityLogout } from "@/hooks/useInactivityLogout";
 import { User } from "@ayasemota/types";
 import { Payment } from "@ayasemota/types";
 import { ToastProvider } from "@/components/ToastContext";
+import { useSettings } from "@/hooks/useSettings";
 
 const pageTitles: Record<string, string> = {
   dashboard: "Dashboard",
@@ -29,6 +31,7 @@ const pageTitles: Record<string, string> = {
   payments: "Payments",
   events: "Events Management",
   announcements: "Announcements",
+  projects: "Portfolio Management",
 };
 
 function DashboardContent() {
@@ -38,7 +41,7 @@ function DashboardContent() {
 
   useInactivityLogout(30);
 
-  const { users, loading: usersLoading, updateUser } = useUsers();
+  const { users, loading: usersLoading, updateUser, addUser, deleteUser } = useUsers();
   const {
     payments,
     loading: paymentsLoading,
@@ -60,6 +63,7 @@ function DashboardContent() {
     updateAnnouncement,
     deleteAnnouncement,
   } = useAnnouncements();
+  const { settings, updateSettings } = useSettings();
 
   const [activeSection, setActiveSection] = useState(tab);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -212,6 +216,8 @@ function DashboardContent() {
               events={events}
               announcements={announcements}
               loading={initialLoading}
+              settings={settings}
+              updateSettings={updateSettings}
             />
           )}
 
@@ -224,6 +230,7 @@ function DashboardContent() {
               statusFilter={statusFilter}
               setStatusFilter={setStatusFilter}
               setSelectedUser={handleSelectUser}
+              onAddUser={addUser}
             />
           )}
 
@@ -257,6 +264,8 @@ function DashboardContent() {
               onDeleteAnnouncement={deleteAnnouncement}
             />
           )}
+
+          {activeSection === "projects" && <ProjectsSection />}
         </main>
 
         <Footer />
@@ -272,6 +281,7 @@ function DashboardContent() {
           onPaymentSelect={setSelectedPayment}
           onAddPayment={handleAddPayment}
           onDeletePayment={handlePaymentDelete}
+          onDeleteUser={deleteUser}
         />
       )}
 

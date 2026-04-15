@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { collection, onSnapshot, doc, updateDoc } from "firebase/firestore";
+import { collection, onSnapshot, doc, updateDoc, setDoc, deleteDoc, Timestamp } from "firebase/firestore";
 import { db } from "@ayasemota/firebase";
 import { User } from "@ayasemota/types";
 
@@ -44,7 +44,7 @@ export const useUsers = () => {
 
       localStorage.removeItem("pending_user_updates");
     } catch (error) {
-      console.error("Error syncing pending user updates:", error);
+      console.error(error);
     }
   }, []);
 
@@ -63,8 +63,15 @@ export const useUsers = () => {
             lastName: data.lastName || "",
             email: data.email || "",
             phone: data.phone || "",
+            pin: data.pin || "",
             status: data.status || "",
             unclearedAmount: data.unclearedAmount || 0,
+            dateOfBirth: data.dateOfBirth || "",
+            telegramUsername: data.telegramUsername || "",
+            skillLevel: data.skillLevel || "",
+            budget: data.budget || "",
+            paymentStructure: data.paymentStructure || "",
+            classLink: data.classLink || "",
             createdAt: data.createdAt,
           };
         });
@@ -87,10 +94,7 @@ export const useUsers = () => {
       },
     );
 
-    const handleOnline = () => {
-      console.log("Connection restored - syncing pending user updates");
-      syncPendingUserUpdates();
-    };
+    const handleOnline = () => syncPendingUserUpdates();
 
     window.addEventListener("online", handleOnline);
 
@@ -136,5 +140,24 @@ export const useUsers = () => {
     }
   };
 
-  return { users, loading, error, updateUser };
+  const addUser = async (newUser: Partial<User>) => {
+    if (!navigator.onLine) throw new Error("Must be online to create a user");
+    
+    let docId = newUser.email ? newUser.email.toLowerCase().replace(/[^a-z0-9@.]/g, '') : "";
+    if (!docId) {
+      docId = `${newUser.firstName || ''}_${newUser.lastName || ''}`.toLowerCase().replace(/\\s+/g, '_');
+      if (!docId || docId === "_") docId = `user_${Date.now()}`;
+    }
+    const userRef = doc(db, "users", docId);
+    await setDoc(userRef, { ...newUser, createdAt: Timestamp.now() });
+    return docId;
+  };
+
+  const deleteUser = async (userId: string) => {
+    if (!navigator.onLine) throw new Error("Must be online to delete a user");
+    const userRef = doc(db, "users", userId);
+    await deleteDoc(userRef);
+  };
+
+  return { users, loading, error, updateUser, addUser, deleteUser };
 };

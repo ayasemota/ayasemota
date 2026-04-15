@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Modal from "./Modal";
 import { User, Payment } from "@ayasemota/types";
-import { Plus } from "lucide-react";
+import { Plus, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import AddPaymentModal from "./AddPaymentModal";
 
 import { useToast } from "./ToastContext";
@@ -26,6 +26,7 @@ interface UserDetailModalProps {
     paymentDate?: string;
   }) => Promise<void>;
   onDeletePayment: (paymentId: string) => Promise<void>;
+  onDeleteUser: (userId: string) => Promise<void>;
 }
 
 export default function UserDetailModal({
@@ -37,10 +38,14 @@ export default function UserDetailModal({
   onPaymentSelect,
   onAddPayment,
   onDeletePayment,
+  onDeleteUser,
 }: UserDetailModalProps) {
   const [editedUser, setEditedUser] = useState<User | null>(user);
   const [showAddPayment, setShowAddPayment] = useState(false);
-  const { showToast, addAction } = useToast();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showRegDetails, setShowRegDetails] = useState(false);
+  const { showToast } = useToast();
 
   if (!user || !editedUser) return null;
 
@@ -89,14 +94,6 @@ export default function UserDetailModal({
   const handleSave = async () => {
     if (!user.id) return;
 
-    const previousValues: Partial<User> = {
-      firstName: user.firstName,
-      lastName: user.lastName,
-      phone: user.phone,
-      status: user.status,
-      unclearedAmount: user.unclearedAmount,
-    };
-
     try {
       const unclearedAmount = editedUser.unclearedAmount
         ? parseFloat(String(editedUser.unclearedAmount).replace(/,/g, ""))
@@ -105,69 +102,33 @@ export default function UserDetailModal({
         firstName: editedUser.firstName,
         lastName: editedUser.lastName,
         phone: editedUser.phone,
+        pin: editedUser.pin || "",
         status: editedUser.status || "",
         unclearedAmount: unclearedAmount,
+        classLink: editedUser.classLink || "",
       };
       await onUserUpdate(user.id, newValues);
-
-      const userId = user.id;
-
-      const changes: { field: string; from: string; to: string }[] = [];
-      if (previousValues.firstName !== newValues.firstName) {
-        changes.push({
-          field: "First Name",
-          from: previousValues.firstName || "",
-          to: newValues.firstName || "",
-        });
-      }
-      if (previousValues.lastName !== newValues.lastName) {
-        changes.push({
-          field: "Last Name",
-          from: previousValues.lastName || "",
-          to: newValues.lastName || "",
-        });
-      }
-      if (previousValues.phone !== newValues.phone) {
-        changes.push({
-          field: "Phone",
-          from: previousValues.phone || "",
-          to: newValues.phone || "",
-        });
-      }
-      if (previousValues.status !== newValues.status) {
-        changes.push({
-          field: "Status",
-          from: previousValues.status || "",
-          to: newValues.status || "",
-        });
-      }
-      if (previousValues.unclearedAmount !== newValues.unclearedAmount) {
-        changes.push({
-          field: "Uncleared",
-          from: String(previousValues.unclearedAmount || 0),
-          to: String(newValues.unclearedAmount || 0),
-        });
-      }
-
-      if (changes.length > 0) {
-        addAction(
-          `Updated ${editedUser.firstName} ${editedUser.lastName}`,
-          async () => {
-            await onUserUpdate(userId, previousValues);
-            setEditedUser((prev) =>
-              prev ? { ...prev, ...previousValues } : prev,
-            );
-          },
-          async () => {
-            await onUserUpdate(userId, newValues);
-            setEditedUser((prev) => (prev ? { ...prev, ...newValues } : prev));
-          },
-          { changes },
-        );
-      }
+      setEditedUser((prev) => (prev ? { ...prev, ...newValues } : prev));
+      showToast("User updated successfully");
     } catch (error) {
       console.error("Error saving user:", error);
-      showToast("Failed to save");
+      showToast("Failed to save user");
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!user.id) return;
+    setIsDeleting(true);
+    try {
+      await onDeleteUser(user.id);
+      showToast("User deleted successfully");
+      onClose();
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      showToast("Failed to delete user");
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
     }
   };
 
@@ -226,6 +187,19 @@ export default function UserDetailModal({
 
             <div>
               <label className="text-xs font-medium text-gray-500 uppercase block mb-2">
+                PIN Code
+              </label>
+              <input
+                type="text"
+                value={editedUser.pin || ""}
+                onChange={(e) => handleFieldChange("pin", e.target.value)}
+                onBlur={handleSave}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-medium text-gray-500 uppercase block mb-2">
                 Account Status
               </label>
               <input
@@ -265,7 +239,118 @@ export default function UserDetailModal({
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
+            <div className="space-y-2 mt-4">
+              <label className="text-xs font-bold uppercase text-muted-foreground flex items-center gap-2">
+                Telegram Class Link
+              </label>
+              <input
+                type="text"
+                value={editedUser.classLink || ""}
+                onChange={(e) => handleFieldChange("classLink", e.target.value)}
+                onBlur={handleSave}
+                placeholder="https://t.me/..."
+                className="w-full px-4 py-2 bg-background border border-input rounded-lg focus:ring-2 focus:ring-primary focus:outline-none"
+              />
+            </div>
 
+            {/* Registration Details Accordion */}
+            <div className="pt-4 border-t border-gray-200 mt-4">
+              <button
+                onClick={() => setShowRegDetails(!showRegDetails)}
+                className="flex items-center justify-between w-full text-left text-sm font-semibold text-gray-700 hover:text-gray-900 transition-colors"
+                type="button"
+              >
+                <span>Registration Details</span>
+                {showRegDetails ? (
+                  <ChevronUp size={18} />
+                ) : (
+                  <ChevronDown size={18} />
+                )}
+              </button>
+
+              {showRegDetails && (
+                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-medium text-gray-500 uppercase block mb-1">
+                      Date of Birth
+                    </label>
+                    <p className="text-sm text-gray-900 bg-gray-100 px-3 py-2 rounded-lg">
+                      {user.dateOfBirth || "N/A"}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-gray-500 uppercase block mb-1">
+                      Telegram Username
+                    </label>
+                    <p className="text-sm text-gray-900 bg-gray-100 px-3 py-2 rounded-lg">
+                      {user.telegramUsername || "N/A"}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-gray-500 uppercase block mb-1">
+                      Skill Level
+                    </label>
+                    <p className="text-sm text-gray-900 bg-gray-100 px-3 py-2 rounded-lg">
+                      {user.skillLevel || "N/A"}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-gray-500 uppercase block mb-1">
+                      Budget (Input)
+                    </label>
+                    <p className="text-sm text-gray-900 bg-gray-100 px-3 py-2 rounded-lg">
+                      {user.budget || "N/A"}
+                    </p>
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="text-xs font-medium text-gray-500 uppercase block mb-1">
+                      Payment Structure
+                    </label>
+                    <p className="text-sm text-gray-900 bg-gray-100 px-3 py-2 rounded-lg">
+                      {user.paymentStructure || "N/A"}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Delete button section */}
+            <div className="pt-4 border-t border-gray-200 mt-4">
+              {showDeleteConfirm ? (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4 space-y-4">
+                  <p className="text-red-800 font-medium">
+                    Are you sure you want to delete this user?
+                  </p>
+                  <p className="text-red-600 text-sm">
+                    This action cannot be undone and will permanently remove
+                    this user.
+                  </p>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={handleDelete}
+                      disabled={isDeleting}
+                      className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium disabled:opacity-50"
+                    >
+                      {isDeleting ? "Deleting..." : "Confirm Delete"}
+                    </button>
+                    <button
+                      onClick={() => setShowDeleteConfirm(false)}
+                      className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="w-full px-4 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors font-medium flex items-center justify-center gap-2"
+                >
+                  <Trash2 size={18} />
+                  Delete User
+                </button>
+              )}
+            </div>
           </div>
 
           <div>

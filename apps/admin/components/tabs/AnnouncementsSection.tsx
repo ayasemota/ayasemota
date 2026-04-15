@@ -29,7 +29,7 @@ export default function AnnouncementsSection({
   onUpdateAnnouncement,
   onDeleteAnnouncement,
 }: AnnouncementsSectionProps) {
-  const { addAction } = useToast();
+  const { showToast } = useToast();
   const [showNewForm, setShowNewForm] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState<string | null>(
     null,
@@ -45,13 +45,7 @@ export default function AnnouncementsSection({
 
     try {
       const newId = await onAddAnnouncement(newAnnouncement);
-      addAction(
-        "Create Announcement",
-        () => onDeleteAnnouncement(newId),
-        async () => {
-          await onAddAnnouncement(newAnnouncement, newId);
-        },
-      );
+      showToast("Announcement created successfully");
 
       setNewAnnouncement({ title: "", description: "", isVisible: false });
       setShowNewForm(false);
@@ -70,14 +64,7 @@ export default function AnnouncementsSection({
 
     try {
       await onUpdateAnnouncement(announcementId, { [field]: value });
-      addAction(
-        "Update Announcement",
-        () =>
-          onUpdateAnnouncement(announcementId, {
-            [field]: oldAnnouncement[field],
-          }),
-        () => onUpdateAnnouncement(announcementId, { [field]: value }),
-      );
+      showToast("Announcement updated successfully");
     } catch (error) {
       console.error("Error updating announcement:", error);
     }
@@ -96,14 +83,7 @@ export default function AnnouncementsSection({
       try {
         await onDeleteAnnouncement(deleteConfirmation);
         if (deletedAnnouncement) {
-          const { id: _id, ...data } = deletedAnnouncement;
-          addAction(
-            "Delete Announcement",
-            async () => {
-              await onAddAnnouncement(data, deletedAnnouncement.id);
-            },
-            () => onDeleteAnnouncement(deletedAnnouncement.id!),
-          );
+          showToast("Announcement deleted successfully");
         }
       } catch (error) {
         console.error("Error deleting announcement:", error);

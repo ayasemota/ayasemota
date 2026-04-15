@@ -1,22 +1,27 @@
 "use client";
 
-import { ArrowRight } from "lucide-react";
+import { usePortfolioData } from "@/hooks/usePortfolioData";
+import { ArrowRight, Loader2 } from "lucide-react";
 
 export default function AboutSection() {
+  const { data, loading } = usePortfolioData();
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-10">
+        <Loader2 className="animate-spin text-accent-purple" size={24} />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8 text-muted-light max-w-3xl animate-fadeInUp opacity-0">
       <div className="space-y-6 text-lg leading-relaxed">
-        <p>
-          I&apos;m a front end developer with years of experience building
-          scalable web applications and I focus on making things simple, fast,
-          and understandable for beginners.
-        </p>
-        <p>
-          When I&apos;m not building or experimenting with new ideas,
-          you&apos;ll find me teaching tech to young people, breaking things
-          down in the simplest way possible, or helping others start their
-          journey into web development.
-        </p>
+        {data.about.length > 0 ? (
+          data.about.map((paragraph, idx) => <p key={idx}>{paragraph}</p>)
+        ) : (
+          <p>No bio available.</p>
+        )}
       </div>
 
       <div className="flex gap-4 pt-4">
