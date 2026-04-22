@@ -115,7 +115,6 @@ export const useAnnouncements = () => {
     );
 
     const handleOnline = () => {
-      console.log("Connection restored - syncing pending announcements");
       syncPendingAnnouncements();
     };
 
