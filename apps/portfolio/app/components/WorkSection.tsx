@@ -31,7 +31,7 @@ export default function WorkSection() {
           >
             <div className="absolute inset-0 bg-linear-to-br from-accent-purple/5 to-accent-blue/5 opacity-0 group-hover:opacity-10 rounded-lg transition-opacity duration-500"></div>
 
-            <Link href={project.link} target="_blank">
+            <Link href={project.link} target="_blank" rel="noopener noreferrer">
               <div className="flex justify-between items-start gap-6 relative z-10">
                 <div className="flex-1 space-y-3">
                   <div className="flex flex-wrap items-center gap-3">

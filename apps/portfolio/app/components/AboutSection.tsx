@@ -28,6 +28,7 @@ export default function AboutSection() {
         <a
           href="https://t.me/ayasemota/"
           target="_blank"
+          rel="noopener noreferrer"
           className="group relative px-8 py-4 border border-foreground rounded-lg hover:bg-foreground hover:text-background transition-all duration-300 focus:outline-none overflow-hidden font-medium"
         >
           <span className="relative z-10 flex items-center gap-2">
