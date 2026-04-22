@@ -1,6 +1,6 @@
-import { initializeApp, getApps } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
+import { initializeApp, getApps, FirebaseApp } from "firebase/app";
+import { getFirestore, Firestore } from "firebase/firestore";
+import { getAuth, Auth } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -14,9 +14,9 @@ const firebaseConfig = {
 
 const isConfigValid = !!firebaseConfig.apiKey;
 
-let app;
-let db: any = null;
-let auth: any = null;
+let app: FirebaseApp | undefined;
+let db: Firestore | null = null;
+let auth: Auth | null = null;
 
 if (isConfigValid) {
   try {
