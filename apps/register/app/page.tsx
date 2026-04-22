@@ -26,7 +26,6 @@ export default function Home() {
     setPhase("submitting");
     try {
       await saveRegistration(data);
-      console.log("Onboarding Complete and saved to Firestore:", data);
       setPhase("success");
     } catch (error) {
       console.error("Error saving registration:", error);
