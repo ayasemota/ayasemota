@@ -2,6 +2,12 @@ import { useState } from "react";
 import { User, Payment } from "@ayasemota/types";
 import { X, Calendar, Megaphone, Lock } from "lucide-react";
 
+interface QuickLink {
+  label: string;
+  onClick: () => void;
+  disabled?: boolean;
+}
+
 interface DashboardPageProps {
   user: User;
   payments: Payment[];
@@ -121,7 +127,7 @@ export const DashboardPage = ({
     return "Good Night";
   };
 
-  const quickLinks = [
+  const quickLinks: QuickLink[] = [
     { label: "Make Payment", onClick: onNavigateToPayments, disabled: isRestricted },
     { label: "Edit Profile", onClick: onNavigateToProfile },
     { label: "Settings", onClick: onNavigateToProfile },
@@ -330,16 +336,16 @@ export const DashboardPage = ({
               <button
                 key={index}
                 onClick={link.onClick}
-                disabled={(link as any).disabled}
+                disabled={link.disabled}
                 className={`py-6 rounded-xl font-semibold transition-all duration-300 border ${
-                  (link as any).disabled
+                  link.disabled
                     ? "bg-gray-800/20 text-gray-600 border-transparent cursor-not-allowed"
                     : "text-white bg-gray-800/60 hover:bg-gray-700/60 border-gray-700/50"
                 }`}
               >
                 <div className="flex items-center justify-center gap-2">
                   <span>{link.label}</span>
-                  {(link as any).disabled && <Lock size={14} className="text-gray-700" />}
+                  {link.disabled && <Lock size={14} className="text-gray-700" />}
                 </div>
               </button>
             ))}
