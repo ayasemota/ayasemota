@@ -105,9 +105,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setIsLoggedIn(true);
       localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userData));
       localStorage.setItem("loginTime", Date.now().toString());
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Login Error:", error);
-      throw new Error(error.message || "Login failed");
+      const message = error instanceof Error ? error.message : "Login failed";
+      throw new Error(message);
     } finally {
       setLoading(false);
     }
