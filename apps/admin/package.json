@@ -9,15 +9,15 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@ayasemota/types": "*",
     "@ayasemota/firebase": "*",
+    "@ayasemota/types": "*",
     "firebase": "^12.7.0",
     "lucide-react": "^0.562.0",
     "next": "16.1.1",
     "otpauth": "^9.4.1",
     "qrcode": "^1.5.4",
-    "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
