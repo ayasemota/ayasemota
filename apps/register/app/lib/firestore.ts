@@ -25,7 +25,7 @@ export async function saveRegistration(data: RegistrationData): Promise<string> 
   const lastName = data.fields.lastName || "";
   const docId = generateDocId(data.fields.email || "", firstName, lastName, data.fields.phone || "");
 
-  const rawDoc: any = {
+  const rawDoc = {
     firstName,
     lastName,
     email: data.fields.email,
@@ -36,17 +36,14 @@ export async function saveRegistration(data: RegistrationData): Promise<string> 
     skillLevel: data.answers["skill-level"],
     status: "Pending",
     registeredAt: Timestamp.now(),
+    ...(data.fields.budget && data.fields.budget !== "Skip" ? {
+      budget: data.fields.budget,
+      unclearedAmount: parseFloat(String(data.fields.budget).replace(/[^0-9.]/g, "")) || 0
+    } : {}),
+    ...(data.answers["payment-structure"] && data.answers["payment-structure"] !== "Skip" ? {
+      paymentStructure: data.answers["payment-structure"]
+    } : {})
   };
-
-  if (data.fields.budget && data.fields.budget !== "Skip") {
-    rawDoc.budget = data.fields.budget;
-    rawDoc.unclearedAmount =
-      parseFloat(String(data.fields.budget).replace(/[^0-9.]/g, "")) || 0;
-  }
-
-  if (data.answers["payment-structure"] && data.answers["payment-structure"] !== "Skip") {
-    rawDoc.paymentStructure = data.answers["payment-structure"];
-  }
 
   const userDoc = Object.fromEntries(
     Object.entries(rawDoc).filter(
