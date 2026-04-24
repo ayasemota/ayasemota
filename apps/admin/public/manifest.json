@@ -23,7 +23,7 @@
   ],
   "screenshots": [
     {
-      "src": "/social-preview.png",
+      "src": "/api/social-preview",
       "sizes": "1200x630",
       "type": "image/png"
     }
