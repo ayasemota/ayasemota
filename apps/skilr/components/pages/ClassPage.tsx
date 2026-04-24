@@ -56,7 +56,7 @@ export const ClassPage = ({ user }: ClassPageProps) => {
             ) : (
               <div className="inline-flex flex-col gap-4">
                 <div className="px-8 py-4 bg-gray-800/50 border border-gray-700/50 text-gray-400 rounded-2xl font-medium">
-                  Status: Unenrolled / No Link Assigned
+                  Status: Unenrolled
                 </div>
                 <p className="text-sm text-gray-500 italic max-w-sm">
                   If you have already paid, please contact support to have your account moved to an active learning group.

@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     url: "https://ayz-admin.vercel.app",
     images: [
       {
-        url: "https://ayz-admin.vercel.app/social-preview.png",
+        url: "/api/social-preview",
         width: 1200,
         height: 630,
         alt: "Admin - AY Asemota",
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Admin | AY Asemota",
     description: "All-In-One Management System",
-    images: ["https://ayz-admin.vercel.app/social-preview.png"],
+    images: ["/api/social-preview"],
   },
   metadataBase: new URL("https://ayz-admin.vercel.app"),
 };
