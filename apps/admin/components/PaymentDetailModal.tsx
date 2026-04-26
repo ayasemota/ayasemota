@@ -16,20 +16,6 @@ interface PaymentDetailModalProps {
     updates: Partial<Payment>,
   ) => Promise<void>;
   onPaymentDelete: (paymentId: string) => Promise<void>;
-  onAddPayment: (
-    payment: {
-      userEmail: string;
-      userName: string;
-      userId: string;
-      amount: number;
-      status: string;
-      reference: string;
-      date: string;
-      paymentDate?: string;
-      paymentTime?: string;
-    },
-    customId?: string,
-  ) => Promise<string | void>;
 }
 
 export default function PaymentDetailModal({
@@ -39,11 +25,10 @@ export default function PaymentDetailModal({
   onClose,
   onPaymentUpdate,
   onPaymentDelete,
-  onAddPayment,
 }: PaymentDetailModalProps) {
   const { showToast } = useToast();
   const [editedPayment, setEditedPayment] = useState<Payment | null>(payment);
-  const [isSaving, setIsSaving] = useState(false);
+  const [, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -249,7 +234,6 @@ export default function PaymentDetailModal({
               />
             </div>
           </div>
-
         </div>
 
         {showDeleteConfirm ? (

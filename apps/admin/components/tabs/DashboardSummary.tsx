@@ -1,9 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Users, Calendar, Megaphone, TrendingUp, Settings, Save } from "lucide-react";
+import { Users, Calendar, Megaphone, TrendingUp } from "lucide-react";
 import { User, Payment, Event, Announcement } from "@ayasemota/types";
-import { SystemSettings } from "@/hooks/useSettings";
 
 interface DashboardSummaryProps {
   users: User[];
@@ -11,8 +9,6 @@ interface DashboardSummaryProps {
   events: Event[];
   announcements: Announcement[];
   loading: boolean;
-  settings?: SystemSettings;
-  updateSettings?: (settings: Partial<SystemSettings>) => Promise<void>;
 }
 
 export default function DashboardSummary({
@@ -21,36 +17,10 @@ export default function DashboardSummary({
   events,
   announcements,
   loading,
-  settings,
-  updateSettings,
 }: DashboardSummaryProps) {
-  const [localSettings, setLocalSettings] = useState<SystemSettings>({
-    vatRate: 0,
-    transactionFee: 0,
-  });
-  const [isSavingSettings, setIsSavingSettings] = useState(false);
-
-  useEffect(() => {
-    if (settings) {
-      setLocalSettings(settings);
-    }
-  }, [settings]);
-
-  const handleSaveSettings = async () => {
-    if (!updateSettings) return;
-    setIsSavingSettings(true);
-    try {
-      await updateSettings(localSettings);
-    } catch (err) {
-      console.error("Failed to save settings:", err);
-    } finally {
-      setIsSavingSettings(false);
-    }
-  };
-
   const getUserName = (email: string | undefined) => {
     if (!email) return "N/A";
-    const user = users.find((u) => u.email === email);
+    const user = users.find((entry) => entry.email === email);
     if (user) {
       return `${user.firstName} ${user.lastName}`;
     }
@@ -66,17 +36,19 @@ export default function DashboardSummary({
   }
 
   const totalUsers = users.length;
-  const totalRevenue = payments.reduce((sum, p) => {
-    const status = (p.status || "").toLowerCase().trim();
+  const totalRevenue = payments.reduce((sum, payment) => {
+    const status = (payment.status || "").toLowerCase().trim();
     if (status === "completed") {
-      return sum + (p.amount || 0);
+      return sum + (payment.amount || 0);
     }
     return sum;
   }, 0);
-  const visibleEvents = events.filter((e) => e.isVisible).length;
-  const visibleAnnouncements = announcements.filter((a) => a.isVisible).length;
+  const visibleEvents = events.filter((event) => event.isVisible).length;
+  const visibleAnnouncements = announcements.filter(
+    (announcement) => announcement.isVisible,
+  ).length;
   const recentPayments = payments.slice(0, 3);
-  const recentEvents = events.filter((e) => e.isVisible).slice(0, 3);
+  const recentEvents = events.filter((event) => event.isVisible).slice(0, 3);
 
   const getPaymentDateTime = (payment: Payment) => {
     if (payment.paymentDate && payment.paymentTime) {
@@ -109,6 +81,7 @@ export default function DashboardSummary({
       });
       return `${dateStr} at ${timeStr}`;
     }
+
     return payment.date || "N/A";
   };
 
@@ -211,9 +184,10 @@ export default function DashboardSummary({
             Recent Announcements
           </h3>
           <div className="space-y-3">
-            {announcements.filter((a) => a.isVisible).slice(0, 3).length > 0 ? (
+            {announcements.filter((item) => item.isVisible).slice(0, 3).length >
+            0 ? (
               announcements
-                .filter((a) => a.isVisible)
+                .filter((item) => item.isVisible)
                 .slice(0, 3)
                 .map((announcement) => (
                   <div
@@ -239,7 +213,7 @@ export default function DashboardSummary({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6">
         <div className="bg-card text-card-foreground rounded-lg shadow p-6">
           <h3 className="text-lg font-semibold text-foreground mb-4">
             Recent Payments
@@ -284,61 +258,6 @@ export default function DashboardSummary({
                 No payments yet
               </p>
             )}
-          </div>
-        </div>
-
-        <div className="bg-card text-card-foreground rounded-lg shadow p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-              <Settings size={20} className="text-primary" />
-              Skilr App Settings
-            </h3>
-            {updateSettings && (
-              <button
-                onClick={handleSaveSettings}
-                disabled={isSavingSettings}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-primary-foreground text-sm font-medium rounded hover:bg-primary/90 transition-colors disabled:opacity-50"
-              >
-                <Save size={16} />
-                {isSavingSettings ? "Saving..." : "Save"}
-              </button>
-            )}
-          </div>
-          <div className="space-y-4">
-            <div>
-              <label className="text-xs font-medium text-muted-foreground uppercase block mb-2">
-                Skilr VAT Rate (%)
-              </label>
-              <input
-                type="number"
-                value={localSettings.vatRate}
-                onChange={(e) =>
-                  setLocalSettings({
-                    ...localSettings,
-                    vatRate: parseFloat(e.target.value),
-                  })
-                }
-                className="w-full px-3 py-2 bg-background border border-input rounded-md focus:ring-2 focus:ring-primary focus:outline-none"
-                placeholder="e.g. 4"
-              />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-muted-foreground uppercase block mb-2">
-                Fixed Transaction Fee (₦)
-              </label>
-              <input
-                type="number"
-                value={localSettings.transactionFee}
-                onChange={(e) =>
-                  setLocalSettings({
-                    ...localSettings,
-                    transactionFee: parseFloat(e.target.value),
-                  })
-                }
-                className="w-full px-3 py-2 bg-background border border-input rounded-md focus:ring-2 focus:ring-primary focus:outline-none"
-                placeholder="e.g. 300"
-              />
-            </div>
           </div>
         </div>
       </div>

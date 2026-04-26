@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import {
   Plus,
   Briefcase,
@@ -11,8 +11,8 @@ import {
   ArrowDown,
   ArrowLeft,
   ArrowRight,
-  Save,
   X,
+  Save,
   User as UserIcon,
 } from "lucide-react";
 import { useProjects, Project } from "@/hooks/useProjects";
@@ -35,9 +35,10 @@ export default function ProjectsSection() {
   const [about, setAbout] = useState("");
   const [skills, setSkills] = useState<string[]>([]);
   const [newSkill, setNewSkill] = useState("");
-  const [isSavingBio, setIsSavingBio] = useState(false);
-  const [isSavingSkills, setIsSavingSkills] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+  const lastSavedAboutRef = useRef("");
+  const lastSavedSkillsRef = useRef("[]");
+  const serializedSkills = useMemo(() => JSON.stringify(skills), [skills]);
 
   useEffect(() => {
     const docRef = doc(db, "settings", "portfolio");
@@ -45,18 +46,73 @@ export default function ProjectsSection() {
       if (snapshot.exists()) {
         const d = snapshot.data();
         if (!isInitialized) {
-          setAbout(
-            Array.isArray(d.about) ? d.about.join("\n\n") : d.about || "",
-          );
-          setSkills(Array.isArray(d.skills) ? d.skills : []);
+          const aboutValue = Array.isArray(d.about)
+            ? d.about.join("\n\n")
+            : d.about || "";
+          const skillsValue = Array.isArray(d.skills) ? d.skills : [];
+
+          setAbout(aboutValue);
+          setSkills(skillsValue);
+          lastSavedAboutRef.current = aboutValue;
+          lastSavedSkillsRef.current = JSON.stringify(skillsValue);
           setIsInitialized(true);
         }
       } else {
+        lastSavedAboutRef.current = "";
+        lastSavedSkillsRef.current = "[]";
         setIsInitialized(true);
       }
     });
     return () => unsubscribe();
   }, [isInitialized]);
+
+  useEffect(() => {
+    if (!isInitialized) return;
+    if (about === lastSavedAboutRef.current) return;
+
+    const timeout = setTimeout(async () => {
+      try {
+        const docRef = doc(db, "settings", "portfolio");
+        await setDoc(
+          docRef,
+          {
+            about: about.split("\n\n").filter((p) => p.trim() !== ""),
+          },
+          { merge: true },
+        );
+        lastSavedAboutRef.current = about;
+      } catch (err) {
+        console.error(err);
+        showToast("Failed to sync bio");
+      }
+    }, 450);
+
+    return () => clearTimeout(timeout);
+  }, [about, isInitialized, showToast]);
+
+  useEffect(() => {
+    if (!isInitialized) return;
+    if (serializedSkills === lastSavedSkillsRef.current) return;
+
+    const timeout = setTimeout(async () => {
+      try {
+        const docRef = doc(db, "settings", "portfolio");
+        await setDoc(
+          docRef,
+          {
+            skills,
+          },
+          { merge: true },
+        );
+        lastSavedSkillsRef.current = serializedSkills;
+      } catch (err) {
+        console.error(err);
+        showToast("Failed to sync skills");
+      }
+    }, 450);
+
+    return () => clearTimeout(timeout);
+  }, [skills, serializedSkills, isInitialized, showToast]);
 
   const handleAddSkill = () => {
     if (newSkill.trim() && !skills.includes(newSkill.trim())) {
@@ -80,45 +136,6 @@ export default function ProjectsSection() {
     setSkills(newSkills);
   };
 
-  const handleSaveBio = async () => {
-    setIsSavingBio(true);
-    try {
-      const docRef = doc(db, "settings", "portfolio");
-      await setDoc(
-        docRef,
-        {
-          about: about.split("\n\n").filter((p) => p.trim() !== ""),
-        },
-        { merge: true },
-      );
-      showToast("Bio updated successfully!");
-    } catch (err) {
-      console.error(err);
-      showToast("Failed to save bio");
-    } finally {
-      setIsSavingBio(false);
-    }
-  };
-
-  const handleSaveSkills = async () => {
-    setIsSavingSkills(true);
-    try {
-      const docRef = doc(db, "settings", "portfolio");
-      await setDoc(
-        docRef,
-        {
-          skills: skills,
-        },
-        { merge: true },
-      );
-      showToast("Skills updated successfully!");
-    } catch (err) {
-      console.error(err);
-      showToast("Failed to save skills");
-    } finally {
-      setIsSavingSkills(false);
-    }
-  };
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [formData, setFormData] = useState<Omit<Project, "id" | "index">>({
     title: "",
@@ -189,23 +206,16 @@ export default function ProjectsSection() {
               className="w-full h-64 px-4 py-3 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:outline-none resize-none text-sm leading-relaxed"
               placeholder="Separate paragraphs with double newlines..."
             />
-            <div className="pt-2">
-              <button
-                onClick={handleSaveBio}
-                disabled={isSavingBio}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors shadow-sm font-medium disabled:opacity-50"
-              >
-                <Save size={18} />
-                {isSavingBio ? "Saving..." : "Save Bio"}
-              </button>
-            </div>
+            <p className="text-xs text-muted-foreground pt-2">
+              Auto-sync is on for this section.
+            </p>
           </div>
 
           <div className="bg-card rounded-xl border border-border p-6 space-y-4 shadow-sm h-full flex flex-col">
             <label className="text-xs font-bold uppercase text-muted-foreground block">
               Skills & Expertise
             </label>
-            
+
             <div className="flex-1 flex flex-col gap-4">
               <div className="flex flex-wrap gap-2">
                 <input
@@ -224,7 +234,7 @@ export default function ProjectsSection() {
                 </button>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar">
+              <div className="grid grid-cols-2 gap-3 max-h-50 overflow-y-auto pr-2 custom-scrollbar">
                 {skills.length > 0 ? (
                   skills.map((skill, idx) => (
                     <div
@@ -232,7 +242,9 @@ export default function ProjectsSection() {
                       className="group p-3 bg-secondary/30 border border-border rounded-lg flex flex-col gap-2 hover:border-primary/50 transition-all shadow-sm"
                     >
                       <div className="flex items-center justify-between gap-1">
-                        <span className="text-sm font-medium text-foreground truncate">{skill}</span>
+                        <span className="text-sm font-medium text-foreground truncate">
+                          {skill}
+                        </span>
                         <button
                           onClick={() => handleRemoveSkill(skill)}
                           className="p-1 hover:text-destructive transition-colors opacity-0 group-hover:opacity-100"
@@ -257,7 +269,9 @@ export default function ProjectsSection() {
                             <ArrowRight size={14} />
                           </button>
                         </div>
-                        <span className="text-[10px] text-muted-foreground uppercase font-bold">#{idx + 1}</span>
+                        <span className="text-[10px] text-muted-foreground uppercase font-bold">
+                          #{idx + 1}
+                        </span>
                       </div>
                     </div>
                   ))
@@ -269,16 +283,9 @@ export default function ProjectsSection() {
               </div>
             </div>
 
-            <div className="pt-2">
-              <button
-                onClick={handleSaveSkills}
-                disabled={isSavingSkills}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors shadow-sm font-medium disabled:opacity-50"
-              >
-                <Save size={18} />
-                {isSavingSkills ? "Saving..." : "Save Skills"}
-              </button>
-            </div>
+            <p className="text-xs text-muted-foreground pt-2">
+              Auto-sync is on for this section.
+            </p>
           </div>
         </div>
       </div>

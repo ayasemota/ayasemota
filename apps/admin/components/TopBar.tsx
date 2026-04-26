@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { LogOut, Wifi, WifiOff, Menu } from "lucide-react";
+import { LogOut, Menu } from "lucide-react";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 
 interface TopBarProps {
@@ -33,9 +33,13 @@ export default function TopBar({
             {title}
           </h2>
           <div className="flex items-center gap-2 mt-1">
-            <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-              isOnline ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-            }`}>
+            <div
+              className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                isOnline
+                  ? "bg-green-100 text-green-700"
+                  : "bg-red-100 text-red-700"
+              }`}
+            >
               {isOnline ? (
                 <>
                   <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />

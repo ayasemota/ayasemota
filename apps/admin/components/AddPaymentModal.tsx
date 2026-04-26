@@ -24,7 +24,6 @@ interface AddPaymentModalProps {
     },
     customId?: string,
   ) => Promise<string | void>;
-  onDeletePayment: (paymentId: string) => Promise<void>;
 }
 
 export default function AddPaymentModal({
@@ -32,7 +31,6 @@ export default function AddPaymentModal({
   user,
   onClose,
   onAddPayment,
-  onDeletePayment,
 }: AddPaymentModalProps) {
   const { showToast } = useToast();
   const [amount, setAmount] = useState("");

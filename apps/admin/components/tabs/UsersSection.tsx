@@ -13,7 +13,6 @@ interface UsersSectionProps {
   searchTerm: string;
   setSearchTerm: (term: string) => void;
   statusFilter: string;
-  setStatusFilter: (filter: string) => void;
   setSelectedUser: (user: User) => void;
   onAddUser: (user: Partial<User>) => Promise<string | void>;
 }
@@ -27,7 +26,6 @@ export default function UsersSection({
   searchTerm,
   setSearchTerm,
   statusFilter,
-  setStatusFilter,
   setSelectedUser,
   onAddUser,
 }: UsersSectionProps) {
@@ -48,14 +46,16 @@ export default function UsersSection({
   const handleAddUser = async () => {
     if (!newUser.email) return;
 
-    const emailConflict = users.find(u => u.email.toLowerCase() === newUser.email?.toLowerCase());
+    const emailConflict = users.find(
+      (u) => u.email.toLowerCase() === newUser.email?.toLowerCase(),
+    );
     if (emailConflict) {
       showToast("Email is already in use by another user");
       return;
     }
 
     if (newUser.phone) {
-      const phoneConflict = users.find(u => u.phone === newUser.phone);
+      const phoneConflict = users.find((u) => u.phone === newUser.phone);
       if (phoneConflict) {
         showToast("Phone number is already in use");
         return;
@@ -63,7 +63,7 @@ export default function UsersSection({
     }
 
     if (newUser.pin) {
-      const pinConflict = users.find(u => u.pin === newUser.pin);
+      const pinConflict = users.find((u) => u.pin === newUser.pin);
       if (pinConflict) {
         showToast("This PIN is already in use");
         return;
@@ -191,14 +191,18 @@ export default function UsersSection({
             type="text"
             placeholder="First Name"
             value={newUser.firstName || ""}
-            onChange={(e) => setNewUser({ ...newUser, firstName: e.target.value })}
+            onChange={(e) =>
+              setNewUser({ ...newUser, firstName: e.target.value })
+            }
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
           <input
             type="text"
             placeholder="Last Name"
             value={newUser.lastName || ""}
-            onChange={(e) => setNewUser({ ...newUser, lastName: e.target.value })}
+            onChange={(e) =>
+              setNewUser({ ...newUser, lastName: e.target.value })
+            }
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
           <input

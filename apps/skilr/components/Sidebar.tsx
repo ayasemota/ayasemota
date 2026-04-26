@@ -1,4 +1,12 @@
-import { Home, CreditCard, HelpCircle, Settings, LogOut, Lock, GraduationCap } from "lucide-react";
+import {
+  Home,
+  CreditCard,
+  HelpCircle,
+  Settings,
+  LogOut,
+  Lock,
+  GraduationCap,
+} from "lucide-react";
 
 interface SidebarProps {
   currentPage: string;
@@ -48,15 +56,15 @@ export const Sidebar = ({
             <span>Dashboard</span>
           </button>
 
-            <button
+          <button
             onClick={() => !isRestricted && handleNavigate("payments")}
             disabled={isRestricted}
             className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-300 ${
               currentPage === "payments"
                 ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
                 : isRestricted
-                ? "text-gray-600 cursor-not-allowed opacity-50"
-                : "text-gray-400 hover:bg-gray-800/50 hover:text-white"
+                  ? "text-gray-600 cursor-not-allowed opacity-50"
+                  : "text-gray-400 hover:bg-gray-800/50 hover:text-white"
             }`}
           >
             <div className="flex items-center gap-3">
@@ -65,17 +73,17 @@ export const Sidebar = ({
             </div>
             {isRestricted && <Lock size={14} className="text-gray-600" />}
           </button>
-          
+
           <button
-            onClick={() => handleNavigate("class")}
+            onClick={() => handleNavigate("cohort")}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg ${
-              currentPage === "class"
+              currentPage === "cohort"
                 ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
                 : "text-gray-400 hover:bg-gray-800/50 hover:text-white"
             }`}
           >
             <GraduationCap size={20} />
-            <span>Class</span>
+            <span>Cohort</span>
           </button>
 
           <button

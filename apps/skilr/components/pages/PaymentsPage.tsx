@@ -21,6 +21,14 @@ const formatCurrency = (amount: number) => {
   });
 };
 
+const getRandomTransactionFee = (min: number, max: number) => {
+  const safeMin = Math.min(min, max);
+  const safeMax = Math.max(min, max);
+  if (safeMin === safeMax) return safeMin;
+
+  return Number((Math.random() * (safeMax - safeMin) + safeMin).toFixed(2));
+};
+
 const getPaymentDateTime = (payment: Payment) => {
   if (
     payment.createdAt &&
@@ -50,12 +58,20 @@ export const PaymentsPage = ({
   const [showFailed, setShowFailed] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [pendingPaymentId, setPendingPaymentId] = useState<string | null>(null);
+  const [checkoutTransactionFee, setCheckoutTransactionFee] = useState(0);
   const { initializePayment } = usePaystack();
   const { addPayment, updatePayment } = usePayments(user.email);
   const { settings } = useSettings();
 
   const vatRate = settings?.vatRate ?? 0;
-  const transactionFee = settings?.transactionFee ?? 0;
+  const transactionFeeMin =
+    settings?.transactionFeeMin ?? settings?.transactionFeeRange?.min ?? 0;
+  const transactionFeeMax =
+    settings?.transactionFeeMax ??
+    settings?.transactionFeeRange?.max ??
+    settings?.transactionFee ??
+    0;
+  const transactionFee = checkoutTransactionFee;
 
   const formatInputValue = (value: string): string => {
     const numericValue = value.replace(/,/g, "");
@@ -96,6 +112,9 @@ export const PaymentsPage = ({
 
   const handleContinue = () => {
     if (paymentAmount && parseFloat(paymentAmount) > 0) {
+      setCheckoutTransactionFee(
+        getRandomTransactionFee(transactionFeeMin, transactionFeeMax),
+      );
       setIsCheckout(true);
     }
   };
@@ -154,6 +173,7 @@ export const PaymentsPage = ({
           setShowSuccess(true);
           setIsCheckout(false);
           setPaymentAmount("");
+          setCheckoutTransactionFee(0);
           setPendingPaymentId(null);
           setTimeout(() => setShowSuccess(false), 3000);
         } catch (error) {
@@ -176,6 +196,7 @@ export const PaymentsPage = ({
         } finally {
           setProcessing(false);
           setIsCheckout(false);
+          setCheckoutTransactionFee(0);
           setPendingPaymentId(null);
         }
       },
@@ -263,7 +284,12 @@ export const PaymentsPage = ({
               )}
               {transactionFee > 0 && (
                 <div className="flex justify-between text-gray-300">
-                  <span>Transaction Fee</span>
+                  <span>
+                    Transaction Fee
+                    {transactionFeeMin !== transactionFeeMax
+                      ? ` (N${formatCurrency(transactionFeeMin)} - N${formatCurrency(transactionFeeMax)})`
+                      : ""}
+                  </span>
                   <span>₦{formatCurrency(transactionFee)}</span>
                 </div>
               )}
@@ -430,7 +456,9 @@ export const PaymentsPage = ({
                     </td>
                     <td className="py-4 px-4 text-gray-400 text-xs">
                       <div className="flex items-center gap-2">
-                        <span className="truncate max-w-[120px]">{payment.reference || "N/A"}</span>
+                        <span className="truncate max-w-30">
+                          {payment.reference || "N/A"}
+                        </span>
                         {payment.reference && (
                           <button
                             onClick={(e) => {
@@ -441,7 +469,10 @@ export const PaymentsPage = ({
                             title="Copy Reference"
                           >
                             {copiedRef === payment.reference ? (
-                              <CheckCheck size={14} className="text-green-400" />
+                              <CheckCheck
+                                size={14}
+                                className="text-green-400"
+                              />
                             ) : (
                               <Copy size={14} />
                             )}

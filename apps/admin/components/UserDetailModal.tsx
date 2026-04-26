@@ -442,7 +442,6 @@ export default function UserDetailModal({
           user={user}
           onClose={() => setShowAddPayment(false)}
           onAddPayment={onAddPayment}
-          onDeletePayment={onDeletePayment}
         />
       )}
     </>
