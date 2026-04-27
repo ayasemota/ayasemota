@@ -9,6 +9,7 @@ import {
   Megaphone,
   LayoutDashboard,
   Briefcase,
+  Settings,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -48,6 +49,7 @@ export default function Sidebar({
     { id: "events", label: "Events", icon: Calendar },
     { id: "announcements", label: "Announcements", icon: Megaphone },
     { id: "projects", label: "Portfolio", icon: Briefcase },
+    { id: "skilr", label: "Skilr", icon: Settings },
   ];
 
   return (

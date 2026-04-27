@@ -13,6 +13,7 @@ import PaymentsSection from "@/components/tabs/PaymentsSection";
 import EventsSection from "@/components/tabs/EventsSection";
 import AnnouncementsSection from "@/components/tabs/AnnouncementsSection";
 import ProjectsSection from "@/components/tabs/ProjectsSection";
+import SkilrSettingsSection from "@/components/tabs/SkilrSettingsSection";
 import UserDetailModal from "@/components/UserDetailModal";
 import PaymentDetailModal from "@/components/PaymentDetailModal";
 import { useUsers } from "@/hooks/useUsers";
@@ -32,6 +33,7 @@ const pageTitles: Record<string, string> = {
   events: "Events Management",
   announcements: "Announcements",
   projects: "Portfolio Management",
+  skilr: "Skilr",
 };
 
 function DashboardContent() {
@@ -41,7 +43,13 @@ function DashboardContent() {
 
   useInactivityLogout(30);
 
-  const { users, loading: usersLoading, updateUser, addUser, deleteUser } = useUsers();
+  const {
+    users,
+    loading: usersLoading,
+    updateUser,
+    addUser,
+    deleteUser,
+  } = useUsers();
   const {
     payments,
     loading: paymentsLoading,
@@ -63,7 +71,7 @@ function DashboardContent() {
     updateAnnouncement,
     deleteAnnouncement,
   } = useAnnouncements();
-  const { settings, updateSettings } = useSettings();
+  const { settings, loading: settingsLoading, updateSettings } = useSettings();
 
   const [activeSection, setActiveSection] = useState(tab);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -105,11 +113,18 @@ function DashboardContent() {
       !usersLoading &&
       !paymentsLoading &&
       !eventsLoading &&
-      !announcementsLoading
+      !announcementsLoading &&
+      !settingsLoading
     ) {
       setInitialLoading(false);
     }
-  }, [usersLoading, paymentsLoading, eventsLoading, announcementsLoading]);
+  }, [
+    usersLoading,
+    paymentsLoading,
+    eventsLoading,
+    announcementsLoading,
+    settingsLoading,
+  ]);
 
   const handleSectionChange = (section: string) => {
     router.push(`/dashboard?tab=${section}`);
@@ -209,63 +224,70 @@ function DashboardContent() {
         />
 
         <main className="flex-1 overflow-auto p-4 md:p-6">
-          {activeSection === "dashboard" && (
-            <DashboardSummary
-              users={users}
-              payments={payments}
-              events={events}
-              announcements={announcements}
-              loading={initialLoading}
-              settings={settings}
-              updateSettings={updateSettings}
-            />
-          )}
+          <div className="w-full max-w-5xl mx-auto">
+            {activeSection === "dashboard" && (
+              <DashboardSummary
+                users={users}
+                payments={payments}
+                events={events}
+                announcements={announcements}
+                loading={initialLoading}
+              />
+            )}
 
-          {activeSection === "users" && (
-            <UsersSection
-              users={users}
-              loading={initialLoading}
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              statusFilter={statusFilter}
-              setStatusFilter={setStatusFilter}
-              setSelectedUser={handleSelectUser}
-              onAddUser={addUser}
-            />
-          )}
+            {activeSection === "users" && (
+              <UsersSection
+                users={users}
+                loading={initialLoading}
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                statusFilter={statusFilter}
+                setSelectedUser={handleSelectUser}
+                onAddUser={addUser}
+              />
+            )}
 
-          {activeSection === "payments" && (
-            <PaymentsSection
-              payments={payments}
-              users={users}
-              loading={initialLoading}
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              onPaymentSelect={setSelectedPayment}
-            />
-          )}
+            {activeSection === "payments" && (
+              <PaymentsSection
+                payments={payments}
+                users={users}
+                loading={initialLoading}
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                onPaymentSelect={setSelectedPayment}
+              />
+            )}
 
-          {activeSection === "events" && (
-            <EventsSection
-              events={events}
-              loading={initialLoading}
-              onAddEvent={addEvent}
-              onUpdateEvent={updateEvent}
-              onDeleteEvent={deleteEvent}
-            />
-          )}
+            {activeSection === "events" && (
+              <EventsSection
+                events={events}
+                loading={initialLoading}
+                onAddEvent={addEvent}
+                onUpdateEvent={updateEvent}
+                onDeleteEvent={deleteEvent}
+              />
+            )}
 
-          {activeSection === "announcements" && (
-            <AnnouncementsSection
-              announcements={announcements}
-              loading={initialLoading}
-              onAddAnnouncement={addAnnouncement}
-              onUpdateAnnouncement={updateAnnouncement}
-              onDeleteAnnouncement={deleteAnnouncement}
-            />
-          )}
+            {activeSection === "announcements" && (
+              <AnnouncementsSection
+                announcements={announcements}
+                loading={initialLoading}
+                onAddAnnouncement={addAnnouncement}
+                onUpdateAnnouncement={updateAnnouncement}
+                onDeleteAnnouncement={deleteAnnouncement}
+              />
+            )}
 
-          {activeSection === "projects" && <ProjectsSection />}
+            {activeSection === "projects" && <ProjectsSection />}
+
+            {activeSection === "skilr" && (
+              <SkilrSettingsSection
+                settings={settings}
+                updateSettings={updateSettings}
+                loading={settingsLoading}
+              />
+            )}
+          </div>
         </main>
 
         <Footer />
@@ -292,7 +314,6 @@ function DashboardContent() {
         onClose={() => setSelectedPayment(null)}
         onPaymentUpdate={handlePaymentUpdate}
         onPaymentDelete={handlePaymentDelete}
-        onAddPayment={handleAddPayment}
       />
 
       <Modal

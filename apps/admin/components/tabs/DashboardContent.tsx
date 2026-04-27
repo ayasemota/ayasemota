@@ -35,7 +35,13 @@ export default function DashboardPage() {
 
   useInactivityLogout(30);
 
-  const { users, loading: usersLoading, updateUser, addUser, deleteUser } = useUsers();
+  const {
+    users,
+    loading: usersLoading,
+    updateUser,
+    addUser,
+    deleteUser,
+  } = useUsers();
   const { payments, loading: paymentsLoading } = useAllPayments();
   const {
     events,
@@ -131,8 +137,7 @@ export default function DashboardPage() {
     }
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handlePaymentSelect = (_payment: Payment) => {};
+  const handlePaymentSelect: (payment: Payment) => void = () => {};
 
   const handleAddPayment = async (_payment: {
     userEmail: string;
@@ -183,7 +188,6 @@ export default function DashboardPage() {
               searchTerm={searchTerm}
               setSearchTerm={setSearchTerm}
               statusFilter={statusFilter}
-              setStatusFilter={setStatusFilter}
               setSelectedUser={handleSelectUser}
               onAddUser={addUser}
             />

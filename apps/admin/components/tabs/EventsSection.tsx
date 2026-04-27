@@ -40,7 +40,7 @@ export default function EventsSection({
     if (!newEvent.title) return;
 
     try {
-      const newId = await onAddEvent(newEvent);
+      await onAddEvent(newEvent);
       showToast("Event created successfully");
 
       setNewEvent({

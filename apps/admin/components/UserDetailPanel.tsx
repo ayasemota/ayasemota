@@ -18,14 +18,14 @@ export default function UserDetailPanel({
   onUserUpdate,
 }: UserDetailPanelProps) {
   const [editedUser, setEditedUser] = useState(user);
-  const [isSaving, setIsSaving] = useState(false);
+  const [, setIsSaving] = useState(false);
 
   useEffect(() => {
     setEditedUser(user);
   }, [user]);
 
   const userPayments = payments.filter(
-    (p) => p.userEmail === user.email || p.userId === user.id
+    (p) => p.userEmail === user.email || p.userId === user.id,
   );
 
   const formatPaymentDateTime = (payment: Payment) => {
@@ -36,7 +36,7 @@ export default function UserDetailPanel({
           month: "short",
           day: "numeric",
           year: "numeric",
-        }
+        },
       );
       return `${datePart} at ${payment.paymentTime}`;
     }
@@ -208,8 +208,8 @@ export default function UserDetailPanel({
                               payment.status === "success"
                                 ? "bg-green-100 text-green-800"
                                 : payment.status === "Pending"
-                                ? "bg-yellow-100 text-yellow-800"
-                                : "bg-red-100 text-red-800"
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : "bg-red-100 text-red-800"
                             }`}
                           >
                             {payment.status}

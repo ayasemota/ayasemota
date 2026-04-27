@@ -44,7 +44,7 @@ export default function AnnouncementsSection({
     if (!newAnnouncement.title) return;
 
     try {
-      const newId = await onAddAnnouncement(newAnnouncement);
+      await onAddAnnouncement(newAnnouncement);
       showToast("Announcement created successfully");
 
       setNewAnnouncement({ title: "", description: "", isVisible: false });
