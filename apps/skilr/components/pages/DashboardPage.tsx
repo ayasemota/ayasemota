@@ -7,7 +7,7 @@ interface DashboardPageProps {
   payments: Payment[];
   paymentsLoading: boolean;
   onNavigateToPayments: () => void;
-  onNavigateToProfile: () => void;
+  onNavigateToCohort: () => void;
   onShowUnavailable: () => void;
   announcements?: { id?: string; title: string; description: string }[];
   upcomingEvents?: {
@@ -19,12 +19,16 @@ interface DashboardPageProps {
   isRestricted?: boolean;
 }
 
-const RestrictedOverlay = ({ message = "Restricted Access" }: { message?: string }) => (
+const RestrictedOverlay = ({
+  message = "Restricted Access",
+}: {
+  message?: string;
+}) => (
   <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center p-4 text-center rounded-2xl border border-gray-700/50">
     <div className="w-12 h-12 bg-gray-800 rounded-full flex items-center justify-center mb-3 shadow-xl border border-gray-700">
       <Lock className="text-gray-500" size={24} />
     </div>
-    <p className="text-gray-300 font-medium text-sm leading-relaxed max-w-[200px]">
+    <p className="text-gray-300 font-medium text-sm leading-relaxed max-w-50">
       {message}
     </p>
   </div>
@@ -98,7 +102,7 @@ export const DashboardPage = ({
   payments,
   paymentsLoading,
   onNavigateToPayments,
-  onNavigateToProfile,
+  onNavigateToCohort,
   onShowUnavailable,
   announcements = [],
   upcomingEvents = [],
@@ -106,8 +110,12 @@ export const DashboardPage = ({
 }: DashboardPageProps) => {
   const [showAllEvents, setShowAllEvents] = useState(false);
   const [showAllAnnouncements, setShowAllAnnouncements] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState<(typeof upcomingEvents)[0] | null>(null);
-  const [selectedAnnouncement, setSelectedAnnouncement] = useState<(typeof announcements)[0] | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<
+    (typeof upcomingEvents)[0] | null
+  >(null);
+  const [selectedAnnouncement, setSelectedAnnouncement] = useState<
+    (typeof announcements)[0] | null
+  >(null);
 
   const recentPayments = payments.slice(0, 2);
   const displayEvents = upcomingEvents.slice(0, 3);
@@ -122,9 +130,12 @@ export const DashboardPage = ({
   };
 
   const quickLinks = [
-    { label: "Make Payment", onClick: onNavigateToPayments, disabled: isRestricted },
-    { label: "Edit Profile", onClick: onNavigateToProfile },
-    { label: "Settings", onClick: onNavigateToProfile },
+    {
+      label: "Make Payment",
+      onClick: onNavigateToPayments,
+      disabled: isRestricted,
+    },
+    { label: "Join Cohort", onClick: onNavigateToCohort },
   ];
 
   return (
@@ -160,7 +171,7 @@ export const DashboardPage = ({
                 {displayEvents.map((event, index) => (
                   <div
                     key={event.id || index}
-                    className={`p-4 bg-gray-900/50 rounded-lg border border-gray-700/30 transition-colors duration-300 ${!isRestricted ? 'hover:border-blue-500/30 cursor-pointer' : 'opacity-40'}`}
+                    className={`p-4 bg-gray-900/50 rounded-lg border border-gray-700/30 transition-colors duration-300 ${!isRestricted ? "hover:border-blue-500/30 cursor-pointer" : "opacity-40"}`}
                     onClick={() => !isRestricted && setSelectedEvent(event)}
                   >
                     <h3 className="font-medium text-white mb-1">
@@ -205,8 +216,10 @@ export const DashboardPage = ({
                 {displayAnnouncements.map((item, index) => (
                   <div
                     key={item.id || index}
-                    className={`p-3 bg-gray-900/50 rounded-lg border border-gray-700/30 transition-colors duration-300 ${!isRestricted ? 'hover:border-purple-500/30 cursor-pointer' : 'opacity-40'}`}
-                    onClick={() => !isRestricted && setSelectedAnnouncement(item)}
+                    className={`p-3 bg-gray-900/50 rounded-lg border border-gray-700/30 transition-colors duration-300 ${!isRestricted ? "hover:border-purple-500/30 cursor-pointer" : "opacity-40"}`}
+                    onClick={() =>
+                      !isRestricted && setSelectedAnnouncement(item)
+                    }
                   >
                     <h3 className="text-sm font-medium text-white mb-1">
                       {item.title}
@@ -250,21 +263,35 @@ export const DashboardPage = ({
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-gray-700/30">
-                      <th className="text-left py-3 px-4 text-gray-400 font-medium">Date</th>
-                      <th className="text-left py-3 px-4 text-gray-400 font-medium">Amount</th>
-                      <th className="text-left py-3 px-4 text-gray-400 font-medium">Reference</th>
-                      <th className="text-left py-3 px-4 text-gray-400 font-medium">Status</th>
+                      <th className="text-left py-3 px-4 text-gray-400 font-medium">
+                        Date
+                      </th>
+                      <th className="text-left py-3 px-4 text-gray-400 font-medium">
+                        Amount
+                      </th>
+                      <th className="text-left py-3 px-4 text-gray-400 font-medium">
+                        Reference
+                      </th>
+                      <th className="text-left py-3 px-4 text-gray-400 font-medium">
+                        Status
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {recentPayments.map((payment) => (
                       <tr
                         key={payment.id}
-                        className={`border-b border-gray-700/10 transition-colors duration-300 ${!isRestricted ? 'hover:bg-gray-700/10' : ''}`}
+                        className={`border-b border-gray-700/10 transition-colors duration-300 ${!isRestricted ? "hover:bg-gray-700/10" : ""}`}
                       >
-                        <td className="py-4 px-4 text-gray-300">{getPaymentDateTime(payment)}</td>
-                        <td className="py-4 px-4 text-white font-medium">₦{formatCurrency(payment.amount)}</td>
-                        <td className="py-4 px-4 text-gray-400 text-xs">{payment.reference || "N/A"}</td>
+                        <td className="py-4 px-4 text-gray-300">
+                          {getPaymentDateTime(payment)}
+                        </td>
+                        <td className="py-4 px-4 text-white font-medium">
+                          ₦{formatCurrency(payment.amount)}
+                        </td>
+                        <td className="py-4 px-4 text-gray-400 text-xs">
+                          {payment.reference || "N/A"}
+                        </td>
                         <td className="py-4 px-4">
                           <span
                             className={`px-3 py-1 text-xs rounded-full border ${
@@ -293,7 +320,9 @@ export const DashboardPage = ({
                     className="p-4 bg-gray-900/50 rounded-lg border border-gray-700/30 space-y-3"
                   >
                     <div className="flex justify-between items-start">
-                      <p className="text-lg font-bold text-white">₦{formatCurrency(payment.amount)}</p>
+                      <p className="text-lg font-bold text-white">
+                        ₦{formatCurrency(payment.amount)}
+                      </p>
                       <span
                         className={`px-2 py-1 text-xs rounded-full border ${
                           payment.status === "Completed"
@@ -308,8 +337,12 @@ export const DashboardPage = ({
                         {payment.status}
                       </span>
                     </div>
-                    <p className="text-xs text-gray-500">{getPaymentDateTime(payment)}</p>
-                    <p className="text-xs text-gray-400 truncate">{payment.reference || "N/A"}</p>
+                    <p className="text-xs text-gray-500">
+                      {getPaymentDateTime(payment)}
+                    </p>
+                    <p className="text-xs text-gray-400 truncate">
+                      {payment.reference || "N/A"}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -325,21 +358,23 @@ export const DashboardPage = ({
           <h2 className="font-bold text-white text-2xl md:text-3xl mb-6">
             Quick Links
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {quickLinks.map((link, index) => (
               <button
                 key={index}
                 onClick={link.onClick}
-                disabled={(link as any).disabled}
+                disabled={link.disabled}
                 className={`py-6 rounded-xl font-semibold transition-all duration-300 border ${
-                  (link as any).disabled
+                  link.disabled
                     ? "bg-gray-800/20 text-gray-600 border-transparent cursor-not-allowed"
                     : "text-white bg-gray-800/60 hover:bg-gray-700/60 border-gray-700/50"
                 }`}
               >
                 <div className="flex items-center justify-center gap-2">
                   <span>{link.label}</span>
-                  {(link as any).disabled && <Lock size={14} className="text-gray-700" />}
+                  {link.disabled && (
+                    <Lock size={14} className="text-gray-700" />
+                  )}
                 </div>
               </button>
             ))}

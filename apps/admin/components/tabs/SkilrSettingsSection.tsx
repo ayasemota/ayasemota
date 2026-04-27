@@ -164,21 +164,6 @@ export default function SkilrSettingsSection({
 
   return (
     <div className="max-w-5xl space-y-6">
-      <div className="bg-card text-card-foreground rounded-lg shadow p-6 border border-border">
-        <div className="flex items-start justify-between gap-4 flex-wrap">
-          <div>
-            <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
-              <GraduationCap size={24} className="text-primary" />
-              Skilr App Settings
-            </h2>
-            <p className="text-sm text-muted-foreground mt-1">
-              Changes here save automatically in real time and reflect in the
-              Skilr app.
-            </p>
-          </div>
-        </div>
-      </div>
-
       <div className="bg-card text-card-foreground rounded-lg shadow p-6 border border-border space-y-6">
         <div className="flex flex-wrap items-end gap-4">
           <div className="flex-1 min-w-48">

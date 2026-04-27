@@ -5,7 +5,6 @@ import { User as UserType, Payment, PaystackResponse } from "@ayasemota/types";
 import { PAYSTACK_PUBLIC_KEY, convertToKobo } from "@ayasemota/paystack";
 import { usePaystack } from "@/hooks/usePaystack";
 import { usePayments } from "@/hooks/usePayments";
-import { useSettings } from "@/hooks/useSettings";
 
 interface PaymentsPageProps {
   user: UserType;
@@ -19,14 +18,6 @@ const formatCurrency = (amount: number) => {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
-};
-
-const getRandomTransactionFee = (min: number, max: number) => {
-  const safeMin = Math.min(min, max);
-  const safeMax = Math.max(min, max);
-  if (safeMin === safeMax) return safeMin;
-
-  return Number((Math.random() * (safeMax - safeMin) + safeMin).toFixed(2));
 };
 
 const calculateVatFromAmount = (amount: number, vatRate: number) => {
@@ -64,16 +55,7 @@ export const PaymentsPage = ({
   const [checkoutTransactionFee, setCheckoutTransactionFee] = useState(0);
   const { initializePayment } = usePaystack();
   const { addPayment, updatePayment } = usePayments(user.email);
-  const { settings } = useSettings();
-
-  const vatRate = settings?.vatRate ?? 0;
-  const transactionFeeMin =
-    settings?.transactionFeeMin ?? settings?.transactionFeeRange?.min ?? 0;
-  const transactionFeeMax =
-    settings?.transactionFeeMax ??
-    settings?.transactionFeeRange?.max ??
-    settings?.transactionFee ??
-    0;
+  const vatRate = 0;
   const transactionFee = checkoutTransactionFee;
 
   const formatInputValue = (value: string): string => {
@@ -115,9 +97,7 @@ export const PaymentsPage = ({
 
   const handleContinue = () => {
     if (paymentAmount && parseFloat(paymentAmount) > 0) {
-      setCheckoutTransactionFee(
-        getRandomTransactionFee(transactionFeeMin, transactionFeeMax),
-      );
+      setCheckoutTransactionFee(0);
       setIsCheckout(true);
     }
   };

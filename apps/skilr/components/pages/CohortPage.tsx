@@ -1,10 +1,37 @@
 import { Rocket, ExternalLink } from "lucide-react";
 import { User } from "@ayasemota/types";
-import { useSettings } from "@/hooks/useSettings";
 
 interface CohortPageProps {
   user: User;
 }
+
+const defaultCohortRules = [
+  {
+    title: "Class Structure",
+    points: [
+      "Classes hold every Thursday and Saturday.",
+      "Additional classes may be scheduled based on group activity and engagement.",
+      "Missing two consecutive classes without a valid reason leads to automatic dismissal.",
+    ],
+  },
+  {
+    title: "Confidentiality Agreement",
+    points: [
+      "All class materials are confidential. This includes recordings, documents, discussions, methods, and internal information.",
+      "Materials must not be shared, resold, or disclosed outside the program.",
+      "Confidentiality applies during and after participation except with prior permission.",
+    ],
+  },
+  {
+    title: "Payment Plan and Cancellation",
+    points: [
+      "Payments are due on the 1st day of each month.",
+      "Missing classes or opting for a dismissal does not qualify for a refund.",
+      "Dismissal for misconduct, inactivity, or breach does not attract a refund.",
+      "If dismissal is requested or assigned, classes will be placed on hold but outstanding balance must be paid in full before dismissal is granted.",
+    ],
+  },
+];
 
 const ensureAbsoluteUrl = (url: string) => {
   if (!url) return "";
@@ -13,9 +40,8 @@ const ensureAbsoluteUrl = (url: string) => {
 };
 
 export const CohortPage = ({ user }: CohortPageProps) => {
-  const { settings } = useSettings();
   const hasClass = user.classLink && user.classLink.trim() !== "";
-  const sections = settings?.cohortRules || [];
+  const sections = defaultCohortRules;
 
   return (
     <div className="max-w-5xl mx-auto space-y-8 animate-fade-in">
