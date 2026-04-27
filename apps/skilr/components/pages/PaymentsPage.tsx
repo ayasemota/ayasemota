@@ -5,6 +5,7 @@ import { User as UserType, Payment, PaystackResponse } from "@ayasemota/types";
 import { PAYSTACK_PUBLIC_KEY, convertToKobo } from "@ayasemota/paystack";
 import { usePaystack } from "@/hooks/usePaystack";
 import { usePayments } from "@/hooks/usePayments";
+import { useSettings } from "@/hooks/useSettings";
 
 interface PaymentsPageProps {
   user: UserType;
@@ -20,8 +21,15 @@ const formatCurrency = (amount: number) => {
   });
 };
 
-const calculateVatFromAmount = (amount: number, vatRate: number) => {
-  return Number((amount * (vatRate / 100)).toFixed(2));
+const getRandomTransactionFee = (min: number, max: number) => {
+  const safeMin = Math.min(min, max);
+  const safeMax = Math.max(min, max);
+
+  if (safeMin === safeMax) {
+    return Number(safeMin.toFixed(2));
+  }
+
+  return Number((Math.random() * (safeMax - safeMin) + safeMin).toFixed(2));
 };
 
 const getPaymentDateTime = (payment: Payment) => {
@@ -55,7 +63,10 @@ export const PaymentsPage = ({
   const [checkoutTransactionFee, setCheckoutTransactionFee] = useState(0);
   const { initializePayment } = usePaystack();
   const { addPayment, updatePayment } = usePayments(user.email);
-  const vatRate = 0;
+  const { settings } = useSettings();
+  const vatRate = settings.vatRate ?? 0;
+  const transactionFeeMin = settings.transactionFeeMin ?? 0;
+  const transactionFeeMax = settings.transactionFeeMax ?? 0;
   const transactionFee = checkoutTransactionFee;
 
   const formatInputValue = (value: string): string => {
@@ -92,12 +103,14 @@ export const PaymentsPage = ({
   }, [payments]);
 
   const baseAmount = paymentAmount ? parseFloat(paymentAmount) : 0;
-  const vat = calculateVatFromAmount(baseAmount, vatRate);
+  const vat = Number((baseAmount * (vatRate / 100)).toFixed(2));
   const total = baseAmount + vat + transactionFee;
 
   const handleContinue = () => {
     if (paymentAmount && parseFloat(paymentAmount) > 0) {
-      setCheckoutTransactionFee(0);
+      setCheckoutTransactionFee(
+        getRandomTransactionFee(transactionFeeMin, transactionFeeMax),
+      );
       setIsCheckout(true);
     }
   };
