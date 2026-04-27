@@ -58,6 +58,14 @@ export default function PaymentsSection({
       return `${datePart} at ${payment.paymentTime}`;
     }
 
+    if (payment.paymentDate) {
+      return new Date(payment.paymentDate).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+    }
+
     if (
       payment.createdAt &&
       typeof payment.createdAt === "object" &&
@@ -77,6 +85,28 @@ export default function PaymentsSection({
       return `${dateStr} at ${timeStr}`;
     }
     return payment.date || "N/A";
+  };
+
+  const getPaymentTimestamp = (payment: Payment) => {
+    const dateValue = payment.paymentDate || payment.date;
+
+    if (dateValue) {
+      const dateTime = `${dateValue} ${payment.paymentTime || "00:00"}`;
+      const parsed = new Date(dateTime).getTime();
+      if (!Number.isNaN(parsed)) {
+        return parsed;
+      }
+    }
+
+    if (
+      payment.createdAt &&
+      typeof payment.createdAt === "object" &&
+      "seconds" in payment.createdAt
+    ) {
+      return payment.createdAt.seconds * 1000;
+    }
+
+    return 0;
   };
 
   const handleSort = (field: SortField) => {
@@ -134,20 +164,8 @@ export default function PaymentsSection({
           bValue = (b.status || "").toLowerCase();
           break;
         case "date":
-          if (
-            a.createdAt &&
-            typeof a.createdAt === "object" &&
-            "seconds" in a.createdAt
-          ) {
-            aValue = a.createdAt.seconds;
-          }
-          if (
-            b.createdAt &&
-            typeof b.createdAt === "object" &&
-            "seconds" in b.createdAt
-          ) {
-            bValue = b.createdAt.seconds;
-          }
+          aValue = getPaymentTimestamp(a);
+          bValue = getPaymentTimestamp(b);
           break;
       }
 

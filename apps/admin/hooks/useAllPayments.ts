@@ -8,11 +8,31 @@ import {
   deleteDoc,
   addDoc,
   Timestamp,
-  query,
-  orderBy,
 } from "firebase/firestore";
 import { db } from "@ayasemota/firebase";
 import { Payment } from "@ayasemota/types";
+
+const getPaymentTimestamp = (payment: Payment) => {
+  const dateValue = payment.paymentDate || payment.date;
+
+  if (dateValue) {
+    const dateTime = `${dateValue} ${payment.paymentTime || "00:00"}`;
+    const parsed = new Date(dateTime).getTime();
+    if (!Number.isNaN(parsed)) {
+      return parsed;
+    }
+  }
+
+  if (
+    payment.createdAt &&
+    typeof payment.createdAt === "object" &&
+    "seconds" in payment.createdAt
+  ) {
+    return payment.createdAt.seconds * 1000;
+  }
+
+  return 0;
+};
 
 export function useAllPayments() {
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -22,15 +42,17 @@ export function useAllPayments() {
 
   useEffect(() => {
     const paymentsRef = collection(db, "payments");
-    const q = query(paymentsRef, orderBy("createdAt", "desc"));
 
     const unsubscribe = onSnapshot(
-      q,
+      paymentsRef,
       (snapshot) => {
         const paymentsData: Payment[] = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         })) as Payment[];
+        paymentsData.sort(
+          (a, b) => getPaymentTimestamp(b) - getPaymentTimestamp(a),
+        );
         setPayments(paymentsData);
 
         setLoading(false);

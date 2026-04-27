@@ -42,6 +42,26 @@ const formatCurrency = (amount: number) => {
 };
 
 const getPaymentDateTime = (payment: Payment) => {
+  if (payment.paymentDate && payment.paymentTime) {
+    const datePart = new Date(payment.paymentDate).toLocaleDateString(
+      "en-US",
+      {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      },
+    );
+    return `${datePart} at ${payment.paymentTime}`;
+  }
+
+  if (payment.paymentDate) {
+    return new Date(payment.paymentDate).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  }
+
   if (
     payment.createdAt &&
     typeof payment.createdAt === "object" &&
