@@ -10,8 +10,7 @@ import Preloader from "@/components/Preloader";
 import DashboardSummary from "@/components/tabs/DashboardSummary";
 import UsersSection from "@/components/tabs/UsersSection";
 import PaymentsSection from "@/components/tabs/PaymentsSection";
-import EventsSection from "@/components/tabs/EventsSection";
-import AnnouncementsSection from "@/components/tabs/AnnouncementsSection";
+import UpdatesSection from "@/components/tabs/UpdatesSection";
 import ProjectsSection from "@/components/tabs/ProjectsSection";
 import SkilrSettingsSection from "@/components/tabs/SkilrSettingsSection";
 import UserDetailModal from "@/components/UserDetailModal";
@@ -21,6 +20,7 @@ import { useAllPayments } from "@/hooks/useAllPayments";
 import { useEvents } from "@/hooks/useEvents";
 import { useAnnouncements } from "@/hooks/useAnnouncements";
 import { useInactivityLogout } from "@/hooks/useInactivityLogout";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { User } from "@ayasemota/types";
 import { Payment } from "@ayasemota/types";
 import { ToastProvider } from "@/components/ToastContext";
@@ -30,22 +30,30 @@ const pageTitles: Record<string, string> = {
   dashboard: "Dashboard",
   users: "Users Management",
   payments: "Payments",
-  events: "Events Management",
-  announcements: "Announcements",
+  updates: "Updates",
   projects: "Portfolio Management",
   skilr: "Skilr",
+};
+
+const normalizeSection = (section: string) => {
+  if (section === "events" || section === "announcements") {
+    return "updates";
+  }
+
+  return section;
 };
 
 function DashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const tab = searchParams.get("tab") || "dashboard";
+  const tab = normalizeSection(searchParams.get("tab") || "dashboard");
 
   useInactivityLogout(30);
 
   const {
     users,
     loading: usersLoading,
+    error: usersError,
     updateUser,
     addUser,
     deleteUser,
@@ -53,6 +61,7 @@ function DashboardContent() {
   const {
     payments,
     loading: paymentsLoading,
+    error: paymentsError,
     addPayment,
     updatePayment,
     deletePayment,
@@ -60,6 +69,7 @@ function DashboardContent() {
   const {
     events,
     loading: eventsLoading,
+    error: eventsError,
     addEvent,
     updateEvent,
     deleteEvent,
@@ -67,11 +77,18 @@ function DashboardContent() {
   const {
     announcements,
     loading: announcementsLoading,
+    error: announcementsError,
     addAnnouncement,
     updateAnnouncement,
     deleteAnnouncement,
   } = useAnnouncements();
-  const { settings, loading: settingsLoading, updateSettings } = useSettings();
+  const {
+    settings,
+    loading: settingsLoading,
+    error: settingsError,
+    updateSettings,
+  } = useSettings();
+  const isOnline = useOnlineStatus();
 
   const [activeSection, setActiveSection] = useState(tab);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
@@ -79,7 +96,6 @@ function DashboardContent() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [initialLoading, setInitialLoading] = useState(true);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const selectedUserIdRef = useRef<string | null>(null);
 
@@ -107,24 +123,6 @@ function DashboardContent() {
       }
     }
   }, [users]);
-
-  useEffect(() => {
-    if (
-      !usersLoading &&
-      !paymentsLoading &&
-      !eventsLoading &&
-      !announcementsLoading &&
-      !settingsLoading
-    ) {
-      setInitialLoading(false);
-    }
-  }, [
-    usersLoading,
-    paymentsLoading,
-    eventsLoading,
-    announcementsLoading,
-    settingsLoading,
-  ]);
 
   const handleSectionChange = (section: string) => {
     router.push(`/dashboard?tab=${section}`);
@@ -201,9 +199,57 @@ function DashboardContent() {
     }
   };
 
-  if (initialLoading) {
-    return <Preloader />;
-  }
+  const sectionHasLoading = (section: string) => {
+    switch (section) {
+      case "dashboard":
+        return (
+          usersLoading ||
+          paymentsLoading ||
+          eventsLoading ||
+          announcementsLoading
+        );
+      case "users":
+        return usersLoading;
+      case "payments":
+        return usersLoading || paymentsLoading;
+      case "updates":
+        return eventsLoading || announcementsLoading;
+      case "skilr":
+        return settingsLoading;
+      default:
+        return false;
+    }
+  };
+
+  const sectionHasError = (section: string) => {
+    switch (section) {
+      case "dashboard":
+        return Boolean(
+          usersError || paymentsError || eventsError || announcementsError,
+        );
+      case "users":
+        return Boolean(usersError);
+      case "payments":
+        return Boolean(usersError || paymentsError);
+      case "updates":
+        return Boolean(eventsError || announcementsError);
+      case "skilr":
+        return Boolean(settingsError);
+      default:
+        return false;
+    }
+  };
+
+  const activeSectionIsLoading = sectionHasLoading(activeSection);
+  const activeSectionHasError = sectionHasError(activeSection);
+  const showSectionLoader =
+    !isOnline || activeSectionIsLoading || activeSectionHasError;
+
+  const sectionLoaderMessage = !isOnline
+    ? "You are offline. Waiting for internet connection..."
+    : activeSectionHasError
+      ? "Waiting for database connection..."
+      : "Loading page data...";
 
   return (
     <div className="flex h-dvh bg-gray-50 overflow-hidden">
@@ -225,20 +271,24 @@ function DashboardContent() {
 
         <main className="flex-1 overflow-auto p-4 md:p-6">
           <div className="w-full max-w-5xl mx-auto">
-            {activeSection === "dashboard" && (
+            {showSectionLoader && (
+              <Preloader fullscreen={false} message={sectionLoaderMessage} />
+            )}
+
+            {!showSectionLoader && activeSection === "dashboard" && (
               <DashboardSummary
                 users={users}
                 payments={payments}
                 events={events}
                 announcements={announcements}
-                loading={initialLoading}
+                loading={false}
               />
             )}
 
-            {activeSection === "users" && (
+            {!showSectionLoader && activeSection === "users" && (
               <UsersSection
                 users={users}
-                loading={initialLoading}
+                loading={false}
                 searchTerm={searchTerm}
                 setSearchTerm={setSearchTerm}
                 statusFilter={statusFilter}
@@ -247,44 +297,41 @@ function DashboardContent() {
               />
             )}
 
-            {activeSection === "payments" && (
+            {!showSectionLoader && activeSection === "payments" && (
               <PaymentsSection
                 payments={payments}
                 users={users}
-                loading={initialLoading}
+                loading={false}
                 searchTerm={searchTerm}
                 setSearchTerm={setSearchTerm}
                 onPaymentSelect={setSelectedPayment}
               />
             )}
 
-            {activeSection === "events" && (
-              <EventsSection
+            {!showSectionLoader && activeSection === "updates" && (
+              <UpdatesSection
                 events={events}
-                loading={initialLoading}
+                announcements={announcements}
+                loadingEvents={false}
+                loadingAnnouncements={false}
                 onAddEvent={addEvent}
                 onUpdateEvent={updateEvent}
                 onDeleteEvent={deleteEvent}
-              />
-            )}
-
-            {activeSection === "announcements" && (
-              <AnnouncementsSection
-                announcements={announcements}
-                loading={initialLoading}
                 onAddAnnouncement={addAnnouncement}
                 onUpdateAnnouncement={updateAnnouncement}
                 onDeleteAnnouncement={deleteAnnouncement}
               />
             )}
 
-            {activeSection === "projects" && <ProjectsSection />}
+            {!showSectionLoader && activeSection === "projects" && (
+              <ProjectsSection />
+            )}
 
-            {activeSection === "skilr" && (
+            {!showSectionLoader && activeSection === "skilr" && (
               <SkilrSettingsSection
                 settings={settings}
                 updateSettings={updateSettings}
-                loading={settingsLoading}
+                loading={false}
               />
             )}
           </div>

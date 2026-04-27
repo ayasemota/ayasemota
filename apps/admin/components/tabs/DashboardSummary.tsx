@@ -18,6 +18,36 @@ export default function DashboardSummary({
   announcements,
   loading,
 }: DashboardSummaryProps) {
+  const isCurrentMonthPayment = (payment: Payment) => {
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth();
+    const currentYear = currentDate.getFullYear();
+
+    if (payment.paymentDate) {
+      const paymentDate = new Date(payment.paymentDate);
+      if (!Number.isNaN(paymentDate.getTime())) {
+        return (
+          paymentDate.getMonth() === currentMonth &&
+          paymentDate.getFullYear() === currentYear
+        );
+      }
+    }
+
+    if (
+      payment.createdAt &&
+      typeof payment.createdAt === "object" &&
+      "seconds" in payment.createdAt
+    ) {
+      const paymentDate = new Date(payment.createdAt.seconds * 1000);
+      return (
+        paymentDate.getMonth() === currentMonth &&
+        paymentDate.getFullYear() === currentYear
+      );
+    }
+
+    return false;
+  };
+
   const getUserName = (email: string | undefined) => {
     if (!email) return "N/A";
     const user = users.find((entry) => entry.email === email);
@@ -36,9 +66,9 @@ export default function DashboardSummary({
   }
 
   const totalUsers = users.length;
-  const totalRevenue = payments.reduce((sum, payment) => {
+  const monthlyRevenue = payments.reduce((sum, payment) => {
     const status = (payment.status || "").toLowerCase().trim();
-    if (status === "completed") {
+    if (status === "completed" && isCurrentMonthPayment(payment)) {
       return sum + (payment.amount || 0);
     }
     return sum;
@@ -101,8 +131,8 @@ export default function DashboardSummary({
       color: "bg-primary/10 text-primary",
     },
     {
-      title: "Total Revenue",
-      value: `₦${totalRevenue.toLocaleString()}`,
+      title: "Monthly Revenue",
+      value: `₦${monthlyRevenue.toLocaleString()}`,
       icon: TrendingUp,
       color: "bg-success/10 text-success",
     },

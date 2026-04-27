@@ -19,6 +19,7 @@ import { useProjects, Project } from "@/hooks/useProjects";
 import { doc, onSnapshot, setDoc } from "firebase/firestore";
 import { db } from "@ayasemota/firebase";
 import { useToast } from "../ToastContext";
+import Preloader from "../Preloader";
 
 export default function ProjectsSection() {
   const {
@@ -125,6 +126,12 @@ export default function ProjectsSection() {
     setSkills(skills.filter((s) => s !== skillToRemove));
   };
 
+  const handleRemoveSkillClick = (skillToRemove: string) => {
+    if (confirm("Are you sure you want to remove this skill?")) {
+      handleRemoveSkill(skillToRemove);
+    }
+  };
+
   const handleReorderSkill = (index: number, direction: "left" | "right") => {
     const newSkills = [...skills];
     const otherIndex = direction === "left" ? index - 1 : index + 1;
@@ -180,11 +187,7 @@ export default function ProjectsSection() {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <Preloader fullscreen={false} />;
   }
 
   return (
@@ -246,7 +249,7 @@ export default function ProjectsSection() {
                           {skill}
                         </span>
                         <button
-                          onClick={() => handleRemoveSkill(skill)}
+                          onClick={() => handleRemoveSkillClick(skill)}
                           className="p-1 hover:text-destructive transition-colors opacity-0 group-hover:opacity-100"
                         >
                           <X size={14} />
