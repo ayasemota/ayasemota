@@ -242,7 +242,6 @@ function DashboardContent() {
                 searchTerm={searchTerm}
                 setSearchTerm={setSearchTerm}
                 statusFilter={statusFilter}
-                setStatusFilter={setStatusFilter}
                 setSelectedUser={handleSelectUser}
                 onAddUser={addUser}
               />
