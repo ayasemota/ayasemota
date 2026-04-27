@@ -29,6 +29,10 @@ const getRandomTransactionFee = (min: number, max: number) => {
   return Number((Math.random() * (safeMax - safeMin) + safeMin).toFixed(2));
 };
 
+const calculateVatFromAmount = (amount: number, vatRate: number) => {
+  return Number((amount * (vatRate / 100)).toFixed(2));
+};
+
 const getPaymentDateTime = (payment: Payment) => {
   if (
     payment.createdAt &&
@@ -57,7 +61,6 @@ export const PaymentsPage = ({
   const [showSuccess, setShowSuccess] = useState(false);
   const [showFailed, setShowFailed] = useState(false);
   const [processing, setProcessing] = useState(false);
-  const [pendingPaymentId, setPendingPaymentId] = useState<string | null>(null);
   const [checkoutTransactionFee, setCheckoutTransactionFee] = useState(0);
   const { initializePayment } = usePaystack();
   const { addPayment, updatePayment } = usePayments(user.email);
@@ -107,7 +110,7 @@ export const PaymentsPage = ({
   }, [payments]);
 
   const baseAmount = paymentAmount ? parseFloat(paymentAmount) : 0;
-  const vat = baseAmount * (vatRate / 100);
+  const vat = calculateVatFromAmount(baseAmount, vatRate);
   const total = baseAmount + vat + transactionFee;
 
   const handleContinue = () => {
@@ -142,7 +145,6 @@ export const PaymentsPage = ({
       };
 
       paymentDocId = await addPayment(pendingPayment, user.email);
-      setPendingPaymentId(paymentDocId);
     } catch (error) {
       console.error("Error saving pending payment:", error);
       setProcessing(false);
@@ -174,7 +176,6 @@ export const PaymentsPage = ({
           setIsCheckout(false);
           setPaymentAmount("");
           setCheckoutTransactionFee(0);
-          setPendingPaymentId(null);
           setTimeout(() => setShowSuccess(false), 3000);
         } catch (error) {
           console.error("Error updating payment:", error);
@@ -197,7 +198,6 @@ export const PaymentsPage = ({
           setProcessing(false);
           setIsCheckout(false);
           setCheckoutTransactionFee(0);
-          setPendingPaymentId(null);
         }
       },
     });
@@ -284,12 +284,7 @@ export const PaymentsPage = ({
               )}
               {transactionFee > 0 && (
                 <div className="flex justify-between text-gray-300">
-                  <span>
-                    Transaction Fee
-                    {transactionFeeMin !== transactionFeeMax
-                      ? ` (N${formatCurrency(transactionFeeMin)} - N${formatCurrency(transactionFeeMax)})`
-                      : ""}
-                  </span>
+                  <span>Transaction Fee</span>
                   <span>₦{formatCurrency(transactionFee)}</span>
                 </div>
               )}

@@ -127,42 +127,52 @@ export const useSettings = () => {
     transactionFeeMin: 0,
     transactionFeeMax: 0,
     transactionFeeRange: { min: 0, max: 0 },
-    cohortRules: defaultCohortRules,
+    cohortRules: [],
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const settingsRef = doc(db, "settings", "payments");
-    const unsubscribe = onSnapshot(settingsRef, (docSnap) => {
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        const legacyTransactionFee =
-          typeof data.transactionFee === "number" ? data.transactionFee : 0;
-        const transactionFeeRange = parseTransactionFeeRange(
-          data.transactionFeeRange,
-          legacyTransactionFee,
-        );
+    const unsubscribe = onSnapshot(
+      settingsRef,
+      (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          const legacyTransactionFee =
+            typeof data.transactionFee === "number" ? data.transactionFee : 0;
+          const transactionFeeRange = parseTransactionFeeRange(
+            data.transactionFeeRange,
+            legacyTransactionFee,
+          );
 
-        setSettings({
-          vatRate: data.vatRate || 0,
-          transactionFee: transactionFeeRange.max,
-          transactionFeeMin: transactionFeeRange.min,
-          transactionFeeMax: transactionFeeRange.max,
-          transactionFeeRange,
-          cohortRules: parseCohortRules(data.cohortRules),
-        });
-      } else {
-        setSettings({
-          vatRate: 0,
-          transactionFee: 0,
-          transactionFeeMin: 0,
-          transactionFeeMax: 0,
-          transactionFeeRange: { min: 0, max: 0 },
-          cohortRules: defaultCohortRules,
-        });
-      }
-      setLoading(false);
-    });
+          setSettings({
+            vatRate: data.vatRate || 0,
+            transactionFee: transactionFeeRange.max,
+            transactionFeeMin: transactionFeeRange.min,
+            transactionFeeMax: transactionFeeRange.max,
+            transactionFeeRange,
+            cohortRules: parseCohortRules(data.cohortRules),
+          });
+        } else {
+          setSettings({
+            vatRate: 0,
+            transactionFee: 0,
+            transactionFeeMin: 0,
+            transactionFeeMax: 0,
+            transactionFeeRange: { min: 0, max: 0 },
+            cohortRules: [],
+          });
+        }
+
+        setError(null);
+        setLoading(false);
+      },
+      (err) => {
+        setError(err.message);
+        setLoading(false);
+      },
+    );
 
     return () => unsubscribe();
   }, []);
@@ -172,5 +182,5 @@ export const useSettings = () => {
     await setDoc(settingsRef, newSettings, { merge: true });
   };
 
-  return { settings, loading, updateSettings };
+  return { settings, loading, error, updateSettings };
 };

@@ -1,6 +1,12 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 import {
   doc,
   getDoc,
@@ -14,16 +20,21 @@ import {
 import { db } from "@ayasemota/firebase";
 import { User } from "@ayasemota/types";
 
-const AUTH_STORAGE_KEY = "skilr_user_session";
-
 interface AuthContextType {
   isLoggedIn: boolean;
   user: User | null;
   loading: boolean;
   signIn: (pin: string) => Promise<void>;
   signOut: () => Promise<void>;
-  updateUnclearedAmount: (email: string, amountToReduce: number) => Promise<void>;
-  updateProfile: (fields: { firstName: string; lastName: string; phone: string }) => Promise<void>;
+  updateUnclearedAmount: (
+    email: string,
+    amountToReduce: number,
+  ) => Promise<void>;
+  updateProfile: (fields: {
+    firstName: string;
+    lastName: string;
+    phone: string;
+  }) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -34,32 +45,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const restoreSession = async () => {
-      try {
-        const savedSession = localStorage.getItem(AUTH_STORAGE_KEY);
-        if (savedSession) {
-          const sessionData = JSON.parse(savedSession);
-          const userRef = doc(db, "users", sessionData.id);
-          const userDoc = await getDoc(userRef);
-
-          if (userDoc.exists()) {
-            const userData = { ...userDoc.data(), id: userDoc.id } as User;
-            setUser(userData);
-            setIsLoggedIn(true);
-            localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userData));
-          } else {
-            localStorage.removeItem(AUTH_STORAGE_KEY);
-          }
-        }
-      } catch (error) {
-        console.error("Error restoring session:", error);
-        localStorage.removeItem(AUTH_STORAGE_KEY);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    restoreSession();
+    setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -70,12 +56,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (doc.exists()) {
         const userData = { ...doc.data(), id: doc.id } as User;
         setUser(userData);
-        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userData));
       } else {
         setUser(null);
         setIsLoggedIn(false);
-        localStorage.removeItem(AUTH_STORAGE_KEY);
-        localStorage.removeItem("loginTime");
       }
     });
 
@@ -103,8 +86,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       setUser(userData);
       setIsLoggedIn(true);
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(userData));
-      localStorage.setItem("loginTime", Date.now().toString());
     } catch (error: any) {
       console.error("Login Error:", error);
       throw new Error(error.message || "Login failed");
@@ -116,11 +97,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signOut = async () => {
     setUser(null);
     setIsLoggedIn(false);
-    localStorage.removeItem(AUTH_STORAGE_KEY);
-    localStorage.removeItem("loginTime");
   };
 
-  const updateUnclearedAmount = async (email: string, amountToReduce: number) => {
+  const updateUnclearedAmount = async (
+    email: string,
+    amountToReduce: number,
+  ) => {
     try {
       if (!user?.id) throw new Error("No user logged in");
       const userRef = doc(db, "users", user.id);
@@ -138,7 +120,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const updateProfile = async (fields: { firstName: string; lastName: string; phone: string }) => {
+  const updateProfile = async (fields: {
+    firstName: string;
+    lastName: string;
+    phone: string;
+  }) => {
     try {
       if (!user?.id) throw new Error("No user logged in");
       const sanitized = {
