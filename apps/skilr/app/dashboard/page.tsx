@@ -129,35 +129,37 @@ export default function Dashboard() {
         />
         <div className="lg:pl-76 pt-2">
           <main className="p-6 lg:p-8 min-h-[calc(100vh-4rem)]">
-            {currentPage === "dashboard" && (
-              <DashboardPage
-                user={user}
-                payments={payments}
-                paymentsLoading={paymentsLoading}
-                onNavigateToPayments={() =>
-                  !isRestricted && setCurrentPage("payments")
-                }
-                onNavigateToProfile={() => setCurrentPage("settings")}
-                onShowUnavailable={() => setShowUnavailableModal(true)}
-                announcements={announcements}
-                upcomingEvents={events}
-                isRestricted={isRestricted}
-              />
-            )}
-            {currentPage === "cohort" && <CohortPage user={user} />}
-            {currentPage === "payments" && (
-              <PaymentsPage
-                user={user}
-                payments={payments}
-                paymentsLoading={paymentsLoading}
-                updateUnclearedAmount={updateUnclearedAmount}
-              />
-            )}
-            {currentPage === "help" && <HelpPage />}
-            {currentPage === "settings" && (
-              <SettingsPage user={user} updateProfile={updateProfile} />
-            )}
-            <Footer />
+            <div className="w-full max-w-5xl mx-auto">
+              {currentPage === "dashboard" && (
+                <DashboardPage
+                  user={user}
+                  payments={payments}
+                  paymentsLoading={paymentsLoading}
+                  onNavigateToPayments={() =>
+                    !isRestricted && setCurrentPage("payments")
+                  }
+                  onNavigateToProfile={() => setCurrentPage("settings")}
+                  onShowUnavailable={() => setShowUnavailableModal(true)}
+                  announcements={announcements}
+                  upcomingEvents={events}
+                  isRestricted={isRestricted}
+                />
+              )}
+              {currentPage === "cohort" && <CohortPage user={user} />}
+              {currentPage === "payments" && (
+                <PaymentsPage
+                  user={user}
+                  payments={payments}
+                  paymentsLoading={paymentsLoading}
+                  updateUnclearedAmount={updateUnclearedAmount}
+                />
+              )}
+              {currentPage === "help" && <HelpPage />}
+              {currentPage === "settings" && (
+                <SettingsPage user={user} updateProfile={updateProfile} />
+              )}
+              <Footer />
+            </div>
           </main>
         </div>
       </div>

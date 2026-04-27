@@ -1,8 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
-
-const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Admin | AY Asemota",
@@ -63,7 +60,15 @@ export default function RootLayout({
         <meta name="theme-color" content="#3B82F6" />
         <link rel="apple-touch-icon" href="/icon-192x192.png" />
       </head>
-      <body className={inter.className}>{children}</body>
+      <body
+        className="antialiased"
+        style={{
+          fontFamily:
+            "Segoe UI, -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif",
+        }}
+      >
+        {children}
+      </body>
     </html>
   );
 }

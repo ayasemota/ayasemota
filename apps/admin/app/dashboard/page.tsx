@@ -224,69 +224,71 @@ function DashboardContent() {
         />
 
         <main className="flex-1 overflow-auto p-4 md:p-6">
-          {activeSection === "dashboard" && (
-            <DashboardSummary
-              users={users}
-              payments={payments}
-              events={events}
-              announcements={announcements}
-              loading={initialLoading}
-            />
-          )}
+          <div className="w-full max-w-5xl mx-auto">
+            {activeSection === "dashboard" && (
+              <DashboardSummary
+                users={users}
+                payments={payments}
+                events={events}
+                announcements={announcements}
+                loading={initialLoading}
+              />
+            )}
 
-          {activeSection === "users" && (
-            <UsersSection
-              users={users}
-              loading={initialLoading}
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              statusFilter={statusFilter}
-              setStatusFilter={setStatusFilter}
-              setSelectedUser={handleSelectUser}
-              onAddUser={addUser}
-            />
-          )}
+            {activeSection === "users" && (
+              <UsersSection
+                users={users}
+                loading={initialLoading}
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                statusFilter={statusFilter}
+                setStatusFilter={setStatusFilter}
+                setSelectedUser={handleSelectUser}
+                onAddUser={addUser}
+              />
+            )}
 
-          {activeSection === "payments" && (
-            <PaymentsSection
-              payments={payments}
-              users={users}
-              loading={initialLoading}
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              onPaymentSelect={setSelectedPayment}
-            />
-          )}
+            {activeSection === "payments" && (
+              <PaymentsSection
+                payments={payments}
+                users={users}
+                loading={initialLoading}
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                onPaymentSelect={setSelectedPayment}
+              />
+            )}
 
-          {activeSection === "events" && (
-            <EventsSection
-              events={events}
-              loading={initialLoading}
-              onAddEvent={addEvent}
-              onUpdateEvent={updateEvent}
-              onDeleteEvent={deleteEvent}
-            />
-          )}
+            {activeSection === "events" && (
+              <EventsSection
+                events={events}
+                loading={initialLoading}
+                onAddEvent={addEvent}
+                onUpdateEvent={updateEvent}
+                onDeleteEvent={deleteEvent}
+              />
+            )}
 
-          {activeSection === "announcements" && (
-            <AnnouncementsSection
-              announcements={announcements}
-              loading={initialLoading}
-              onAddAnnouncement={addAnnouncement}
-              onUpdateAnnouncement={updateAnnouncement}
-              onDeleteAnnouncement={deleteAnnouncement}
-            />
-          )}
+            {activeSection === "announcements" && (
+              <AnnouncementsSection
+                announcements={announcements}
+                loading={initialLoading}
+                onAddAnnouncement={addAnnouncement}
+                onUpdateAnnouncement={updateAnnouncement}
+                onDeleteAnnouncement={deleteAnnouncement}
+              />
+            )}
 
-          {activeSection === "projects" && <ProjectsSection />}
+            {activeSection === "projects" && <ProjectsSection />}
 
-          {activeSection === "skilr" && (
-            <SkilrSettingsSection
-              settings={settings}
-              updateSettings={updateSettings}
-              loading={settingsLoading}
-            />
-          )}
+            {activeSection === "skilr" && (
+              <SkilrSettingsSection
+                settings={settings}
+                updateSettings={updateSettings}
+                loading={settingsLoading}
+              />
+            )}
+          </div>
         </main>
 
         <Footer />
