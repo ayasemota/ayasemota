@@ -5,11 +5,10 @@ import {
   Users,
   CreditCard,
   Menu,
-  Calendar,
   Megaphone,
   LayoutDashboard,
   Briefcase,
-  Settings,
+  GraduationCap,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -46,10 +45,9 @@ export default function Sidebar({
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
     { id: "users", label: "Users", icon: Users },
     { id: "payments", label: "Payments", icon: CreditCard },
-    { id: "events", label: "Events", icon: Calendar },
-    { id: "announcements", label: "Announcements", icon: Megaphone },
+    { id: "updates", label: "Updates", icon: Megaphone },
     { id: "projects", label: "Portfolio", icon: Briefcase },
-    { id: "skilr", label: "Skilr", icon: Settings },
+    { id: "skilr", label: "Skilr", icon: GraduationCap },
   ];
 
   return (

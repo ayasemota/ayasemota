@@ -10,8 +10,7 @@ import Preloader from "@/components/Preloader";
 import DashboardSummary from "@/components/tabs/DashboardSummary";
 import UsersSection from "@/components/tabs/UsersSection";
 import PaymentsSection from "@/components/tabs/PaymentsSection";
-import EventsSection from "@/components/tabs/EventsSection";
-import AnnouncementsSection from "@/components/tabs/AnnouncementsSection";
+import UpdatesSection from "@/components/tabs/UpdatesSection";
 import ProjectsSection from "@/components/tabs/ProjectsSection";
 import SkilrSettingsSection from "@/components/tabs/SkilrSettingsSection";
 import UserDetailModal from "@/components/UserDetailModal";
@@ -31,16 +30,23 @@ const pageTitles: Record<string, string> = {
   dashboard: "Dashboard",
   users: "Users Management",
   payments: "Payments",
-  events: "Events Management",
-  announcements: "Announcements",
+  updates: "Updates",
   projects: "Portfolio Management",
   skilr: "Skilr",
+};
+
+const normalizeSection = (section: string) => {
+  if (section === "events" || section === "announcements") {
+    return "updates";
+  }
+
+  return section;
 };
 
 function DashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const tab = searchParams.get("tab") || "dashboard";
+  const tab = normalizeSection(searchParams.get("tab") || "dashboard");
 
   useInactivityLogout(30);
 
@@ -206,10 +212,8 @@ function DashboardContent() {
         return usersLoading;
       case "payments":
         return usersLoading || paymentsLoading;
-      case "events":
-        return eventsLoading;
-      case "announcements":
-        return announcementsLoading;
+      case "updates":
+        return eventsLoading || announcementsLoading;
       case "skilr":
         return settingsLoading;
       default:
@@ -227,10 +231,8 @@ function DashboardContent() {
         return Boolean(usersError);
       case "payments":
         return Boolean(usersError || paymentsError);
-      case "events":
-        return Boolean(eventsError);
-      case "announcements":
-        return Boolean(announcementsError);
+      case "updates":
+        return Boolean(eventsError || announcementsError);
       case "skilr":
         return Boolean(settingsError);
       default:
@@ -306,20 +308,15 @@ function DashboardContent() {
               />
             )}
 
-            {!showSectionLoader && activeSection === "events" && (
-              <EventsSection
+            {!showSectionLoader && activeSection === "updates" && (
+              <UpdatesSection
                 events={events}
-                loading={false}
+                announcements={announcements}
+                loadingEvents={false}
+                loadingAnnouncements={false}
                 onAddEvent={addEvent}
                 onUpdateEvent={updateEvent}
                 onDeleteEvent={deleteEvent}
-              />
-            )}
-
-            {!showSectionLoader && activeSection === "announcements" && (
-              <AnnouncementsSection
-                announcements={announcements}
-                loading={false}
                 onAddAnnouncement={addAnnouncement}
                 onUpdateAnnouncement={updateAnnouncement}
                 onDeleteAnnouncement={deleteAnnouncement}
