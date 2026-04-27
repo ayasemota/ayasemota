@@ -196,11 +196,50 @@ export default function PaymentsSection({
     }, 0);
   }, [filteredAndSortedPayments]);
 
+  const monthlyRevenue = useMemo(() => {
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth();
+    const currentYear = currentDate.getFullYear();
+
+    const isCurrentMonthPayment = (payment: Payment) => {
+      if (payment.paymentDate) {
+        const paymentDate = new Date(payment.paymentDate);
+        if (!Number.isNaN(paymentDate.getTime())) {
+          return (
+            paymentDate.getMonth() === currentMonth &&
+            paymentDate.getFullYear() === currentYear
+          );
+        }
+      }
+
+      if (
+        payment.createdAt &&
+        typeof payment.createdAt === "object" &&
+        "seconds" in payment.createdAt
+      ) {
+        const paymentDate = new Date(payment.createdAt.seconds * 1000);
+        return (
+          paymentDate.getMonth() === currentMonth &&
+          paymentDate.getFullYear() === currentYear
+        );
+      }
+
+      return false;
+    };
+
+    return payments.reduce((sum, payment) => {
+      const status = payment.status?.toLowerCase() || "";
+      if (status === "completed" && isCurrentMonthPayment(payment)) {
+        return sum + (payment.amount || 0);
+      }
+      return sum;
+    }, 0);
+  }, [payments]);
+
   const statusCounts = useMemo(() => {
     const counts: Record<string, number> = {
       all: payments.length,
       completed: 0,
-      pending: 0,
       failed: 0,
     };
 
@@ -208,8 +247,6 @@ export default function PaymentsSection({
       const status = payment.status?.toLowerCase() || "";
       if (status === "completed") {
         counts.completed++;
-      } else if (status === "pending") {
-        counts.pending++;
       } else if (status === "failed") {
         counts.failed++;
       }
@@ -253,9 +290,9 @@ export default function PaymentsSection({
           </p>
         </div>
         <div className="bg-white rounded-lg shadow p-4">
-          <p className="text-sm text-gray-600">Pending</p>
-          <p className="text-2xl font-bold text-yellow-600">
-            {statusCounts.pending}
+          <p className="text-sm text-gray-600">Monthly Revenue</p>
+          <p className="text-2xl font-bold text-indigo-600">
+            ₦{monthlyRevenue.toLocaleString()}
           </p>
         </div>
         <div className="bg-white rounded-lg shadow p-4">
