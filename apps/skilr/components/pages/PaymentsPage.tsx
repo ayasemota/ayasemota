@@ -24,7 +24,10 @@ const formatCurrency = (amount: number) => {
 const getRandomTransactionFee = (min: number, max: number) => {
   const safeMin = Math.min(min, max);
   const safeMax = Math.max(min, max);
-  if (safeMin === safeMax) return safeMin;
+
+  if (safeMin === safeMax) {
+    return Number(safeMin.toFixed(2));
+  }
 
   return Number((Math.random() * (safeMax - safeMin) + safeMin).toFixed(2));
 };
@@ -57,20 +60,13 @@ export const PaymentsPage = ({
   const [showSuccess, setShowSuccess] = useState(false);
   const [showFailed, setShowFailed] = useState(false);
   const [processing, setProcessing] = useState(false);
-  const [pendingPaymentId, setPendingPaymentId] = useState<string | null>(null);
   const [checkoutTransactionFee, setCheckoutTransactionFee] = useState(0);
   const { initializePayment } = usePaystack();
   const { addPayment, updatePayment } = usePayments(user.email);
   const { settings } = useSettings();
-
-  const vatRate = settings?.vatRate ?? 0;
-  const transactionFeeMin =
-    settings?.transactionFeeMin ?? settings?.transactionFeeRange?.min ?? 0;
-  const transactionFeeMax =
-    settings?.transactionFeeMax ??
-    settings?.transactionFeeRange?.max ??
-    settings?.transactionFee ??
-    0;
+  const vatRate = settings.vatRate ?? 0;
+  const transactionFeeMin = settings.transactionFeeMin ?? 0;
+  const transactionFeeMax = settings.transactionFeeMax ?? 0;
   const transactionFee = checkoutTransactionFee;
 
   const formatInputValue = (value: string): string => {
@@ -107,7 +103,7 @@ export const PaymentsPage = ({
   }, [payments]);
 
   const baseAmount = paymentAmount ? parseFloat(paymentAmount) : 0;
-  const vat = baseAmount * (vatRate / 100);
+  const vat = Number((baseAmount * (vatRate / 100)).toFixed(2));
   const total = baseAmount + vat + transactionFee;
 
   const handleContinue = () => {
@@ -142,7 +138,6 @@ export const PaymentsPage = ({
       };
 
       paymentDocId = await addPayment(pendingPayment, user.email);
-      setPendingPaymentId(paymentDocId);
     } catch (error) {
       console.error("Error saving pending payment:", error);
       setProcessing(false);
@@ -174,7 +169,6 @@ export const PaymentsPage = ({
           setIsCheckout(false);
           setPaymentAmount("");
           setCheckoutTransactionFee(0);
-          setPendingPaymentId(null);
           setTimeout(() => setShowSuccess(false), 3000);
         } catch (error) {
           console.error("Error updating payment:", error);
@@ -197,7 +191,6 @@ export const PaymentsPage = ({
           setProcessing(false);
           setIsCheckout(false);
           setCheckoutTransactionFee(0);
-          setPendingPaymentId(null);
         }
       },
     });
@@ -284,12 +277,7 @@ export const PaymentsPage = ({
               )}
               {transactionFee > 0 && (
                 <div className="flex justify-between text-gray-300">
-                  <span>
-                    Transaction Fee
-                    {transactionFeeMin !== transactionFeeMax
-                      ? ` (N${formatCurrency(transactionFeeMin)} - N${formatCurrency(transactionFeeMax)})`
-                      : ""}
-                  </span>
+                  <span>Transaction Fee</span>
                   <span>₦{formatCurrency(transactionFee)}</span>
                 </div>
               )}

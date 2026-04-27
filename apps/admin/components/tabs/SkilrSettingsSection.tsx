@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { GraduationCap, Plus, Trash2 } from "lucide-react";
 import { SystemSettings } from "@/hooks/useSettings";
 
@@ -25,25 +25,12 @@ export default function SkilrSettingsSection({
   loading,
   updateSettings,
 }: SkilrSettingsSectionProps) {
-  const [localSettings, setLocalSettings] = useState<SystemSettings>(settings);
   const [sectionPendingDelete, setSectionPendingDelete] = useState<
     number | null
   >(null);
-  const lastSavedSnapshot = useRef<string>(JSON.stringify(settings));
   const pointTextareaRefs = useRef<Record<string, HTMLTextAreaElement | null>>(
     {},
   );
-
-  const serializedLocalSettings = useMemo(
-    () => JSON.stringify(localSettings),
-    [localSettings],
-  );
-
-  useEffect(() => {
-    setLocalSettings(settings);
-    setSectionPendingDelete(null);
-    lastSavedSnapshot.current = JSON.stringify(settings);
-  }, [settings]);
 
   useLayoutEffect(() => {
     Object.values(pointTextareaRefs.current).forEach((textarea) => {
@@ -51,45 +38,62 @@ export default function SkilrSettingsSection({
       textarea.style.height = "0px";
       textarea.style.height = `${textarea.scrollHeight}px`;
     });
-  }, [localSettings.cohortRules]);
+  }, [settings.cohortRules]);
 
   useEffect(() => {
-    if (serializedLocalSettings === lastSavedSnapshot.current) {
-      return;
+    setSectionPendingDelete(null);
+  }, [settings.cohortRules]);
+
+  const saveSettings = async (nextSettings: Partial<SystemSettings>) => {
+    try {
+      await updateSettings(nextSettings);
+    } catch (error) {
+      console.error("Failed to save Skilr settings", error);
     }
+  };
 
-    const timeout = setTimeout(async () => {
-      try {
-        await updateSettings({
-          ...localSettings,
-          transactionFee: localSettings.transactionFeeMax,
-          transactionFeeRange: {
-            min: Math.min(
-              localSettings.transactionFeeMin,
-              localSettings.transactionFeeMax,
-            ),
-            max: Math.max(
-              localSettings.transactionFeeMin,
-              localSettings.transactionFeeMax,
-            ),
-          },
-        });
-        lastSavedSnapshot.current = serializedLocalSettings;
-      } catch (error) {
-        console.error("Failed to auto-save Skilr settings", error);
-      }
-    }, 450);
+  const updateVatRate = (value: string) => {
+    void saveSettings({ vatRate: parseNumber(value) });
+  };
 
-    return () => clearTimeout(timeout);
-  }, [localSettings, serializedLocalSettings, updateSettings]);
+  const updateTransactionFeeMin = (value: string) => {
+    const min = parseNumber(value);
+    const max = settings.transactionFeeMax;
+
+    void saveSettings({
+      transactionFeeMin: min,
+      transactionFee: max,
+      transactionFeeRange: {
+        min: Math.min(min, max),
+        max: Math.max(min, max),
+      },
+    });
+  };
+
+  const updateTransactionFeeMax = (value: string) => {
+    const max = parseNumber(value);
+    const min = settings.transactionFeeMin;
+
+    void saveSettings({
+      transactionFeeMax: max,
+      transactionFee: max,
+      transactionFeeRange: {
+        min: Math.min(min, max),
+        max: Math.max(min, max),
+      },
+    });
+  };
+
+  const updateCohortRules = (cohortRules: SystemSettings["cohortRules"]) => {
+    void saveSettings({ cohortRules });
+  };
 
   const updateSectionTitle = (sectionIndex: number, title: string) => {
-    setLocalSettings((prev) => ({
-      ...prev,
-      cohortRules: prev.cohortRules.map((section, index) =>
+    updateCohortRules(
+      settings.cohortRules.map((section, index) =>
         index === sectionIndex ? { ...section, title } : section,
       ),
-    }));
+    );
   };
 
   const updateSectionPoint = (
@@ -97,9 +101,8 @@ export default function SkilrSettingsSection({
     pointIndex: number,
     value: string,
   ) => {
-    setLocalSettings((prev) => ({
-      ...prev,
-      cohortRules: prev.cohortRules.map((section, index) => {
+    updateCohortRules(
+      settings.cohortRules.map((section, index) => {
         if (index !== sectionIndex) return section;
 
         return {
@@ -109,47 +112,37 @@ export default function SkilrSettingsSection({
           ),
         };
       }),
-    }));
+    );
   };
 
   const addSection = () => {
-    setLocalSettings((prev) => ({
-      ...prev,
-      cohortRules: [...prev.cohortRules, makeEmptySection()],
-    }));
+    updateCohortRules([...settings.cohortRules, makeEmptySection()]);
   };
 
   const removeSection = (sectionIndex: number) => {
-    setLocalSettings((prev) => {
-      if (prev.cohortRules.length <= 1) {
-        return prev;
-      }
+    if (settings.cohortRules.length <= 1) {
+      return;
+    }
 
-      return {
-        ...prev,
-        cohortRules: prev.cohortRules.filter(
-          (_, index) => index !== sectionIndex,
-        ),
-      };
-    });
+    updateCohortRules(
+      settings.cohortRules.filter((_, index) => index !== sectionIndex),
+    );
     setSectionPendingDelete(null);
   };
 
   const addPoint = (sectionIndex: number) => {
-    setLocalSettings((prev) => ({
-      ...prev,
-      cohortRules: prev.cohortRules.map((section, index) =>
+    updateCohortRules(
+      settings.cohortRules.map((section, index) =>
         index === sectionIndex
           ? { ...section, points: [...section.points, "New rule point"] }
           : section,
       ),
-    }));
+    );
   };
 
   const removePoint = (sectionIndex: number, pointIndex: number) => {
-    setLocalSettings((prev) => ({
-      ...prev,
-      cohortRules: prev.cohortRules.map((section, index) => {
+    updateCohortRules(
+      settings.cohortRules.map((section, index) => {
         if (index !== sectionIndex) return section;
         if (section.points.length <= 1) return section;
 
@@ -158,7 +151,7 @@ export default function SkilrSettingsSection({
           points: section.points.filter((_, pIndex) => pIndex !== pointIndex),
         };
       }),
-    }));
+    );
   };
 
   if (loading) {
@@ -171,21 +164,6 @@ export default function SkilrSettingsSection({
 
   return (
     <div className="max-w-5xl space-y-6">
-      <div className="bg-card text-card-foreground rounded-lg shadow p-6 border border-border">
-        <div className="flex items-start justify-between gap-4 flex-wrap">
-          <div>
-            <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
-              <GraduationCap size={24} className="text-primary" />
-              Skilr App Settings
-            </h2>
-            <p className="text-sm text-muted-foreground mt-1">
-              Changes here save automatically in real time and reflect in the
-              Skilr app.
-            </p>
-          </div>
-        </div>
-      </div>
-
       <div className="bg-card text-card-foreground rounded-lg shadow p-6 border border-border space-y-6">
         <div className="flex flex-wrap items-end gap-4">
           <div className="flex-1 min-w-48">
@@ -194,13 +172,8 @@ export default function SkilrSettingsSection({
             </label>
             <input
               type="number"
-              value={localSettings.vatRate}
-              onChange={(e) =>
-                setLocalSettings((prev) => ({
-                  ...prev,
-                  vatRate: parseNumber(e.target.value),
-                }))
-              }
+              value={settings.vatRate}
+              onChange={(e) => updateVatRate(e.target.value)}
               className="w-full px-3 py-2 bg-background border border-input rounded-md focus:ring-2 focus:ring-primary focus:outline-none"
               placeholder="e.g. 4"
             />
@@ -212,13 +185,8 @@ export default function SkilrSettingsSection({
             </label>
             <input
               type="number"
-              value={localSettings.transactionFeeMin}
-              onChange={(e) =>
-                setLocalSettings((prev) => ({
-                  ...prev,
-                  transactionFeeMin: parseNumber(e.target.value),
-                }))
-              }
+              value={settings.transactionFeeMin}
+              onChange={(e) => updateTransactionFeeMin(e.target.value)}
               className="w-full px-3 py-2 bg-background border border-input rounded-md focus:ring-2 focus:ring-primary focus:outline-none"
               placeholder="e.g. 300"
             />
@@ -230,13 +198,8 @@ export default function SkilrSettingsSection({
             </label>
             <input
               type="number"
-              value={localSettings.transactionFeeMax}
-              onChange={(e) =>
-                setLocalSettings((prev) => ({
-                  ...prev,
-                  transactionFeeMax: parseNumber(e.target.value),
-                }))
-              }
+              value={settings.transactionFeeMax}
+              onChange={(e) => updateTransactionFeeMax(e.target.value)}
               className="w-full px-3 py-2 bg-background border border-input rounded-md focus:ring-2 focus:ring-primary focus:outline-none"
               placeholder="e.g. 500"
             />
@@ -262,7 +225,12 @@ export default function SkilrSettingsSection({
         </p>
 
         <div className="flex flex-wrap gap-5">
-          {localSettings.cohortRules.map((section, sectionIndex) => (
+          {settings.cohortRules.length === 0 ? (
+            <div className="w-full rounded-lg border border-dashed border-border bg-background/60 p-6 text-sm text-muted-foreground">
+              No cohort rules are stored yet. Add a section to start.
+            </div>
+          ) : null}
+          {settings.cohortRules.map((section, sectionIndex) => (
             <div
               key={`section-${sectionIndex}`}
               className="flex-1 min-w-full sm:min-w-80 p-4 rounded-lg border border-border bg-background/70 space-y-3"
@@ -290,7 +258,7 @@ export default function SkilrSettingsSection({
                 ) : (
                   <button
                     onClick={() => setSectionPendingDelete(sectionIndex)}
-                    disabled={localSettings.cohortRules.length <= 1}
+                    disabled={settings.cohortRules.length <= 1}
                     className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded border border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     <Trash2 size={12} />

@@ -12,7 +12,6 @@ import { DashboardPage } from "@/components/pages/DashboardPage";
 import { CohortPage } from "@/components/pages/CohortPage";
 import { PaymentsPage } from "@/components/pages/PaymentsPage";
 import { HelpPage } from "@/components/pages/HelpPage";
-import { SettingsPage } from "@/components/pages/SettingsPage";
 import { Footer } from "@/components/Footer";
 import { Logo } from "@/components/Logo";
 import { UnavailableModal } from "@/components/UnavailableModal";
@@ -27,7 +26,6 @@ export default function Dashboard() {
     signOut,
     loading,
     updateUnclearedAmount,
-    updateProfile,
   } = useAuth();
   const { payments, loading: paymentsLoading } = usePayments(
     user?.email || null,
@@ -50,7 +48,7 @@ export default function Dashboard() {
     const hash = window.location.hash.slice(1);
     if (
       hash &&
-      ["dashboard", "payments", "help", "settings", "cohort"].includes(hash)
+      ["dashboard", "payments", "help", "cohort"].includes(hash)
     ) {
       if (isRestricted && (hash === "payments" || hash === "cohort")) {
         setCurrentPage("dashboard");
@@ -138,7 +136,7 @@ export default function Dashboard() {
                   onNavigateToPayments={() =>
                     !isRestricted && setCurrentPage("payments")
                   }
-                  onNavigateToProfile={() => setCurrentPage("settings")}
+                  onNavigateToCohort={() => setCurrentPage("cohort")}
                   onShowUnavailable={() => setShowUnavailableModal(true)}
                   announcements={announcements}
                   upcomingEvents={events}
@@ -155,9 +153,6 @@ export default function Dashboard() {
                 />
               )}
               {currentPage === "help" && <HelpPage />}
-              {currentPage === "settings" && (
-                <SettingsPage user={user} updateProfile={updateProfile} />
-              )}
               <Footer />
             </div>
           </main>
