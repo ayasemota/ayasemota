@@ -126,6 +126,12 @@ export default function ProjectsSection() {
     setSkills(skills.filter((s) => s !== skillToRemove));
   };
 
+  const handleRemoveSkillClick = (skillToRemove: string) => {
+    if (confirm("Are you sure you want to remove this skill?")) {
+      handleRemoveSkill(skillToRemove);
+    }
+  };
+
   const handleReorderSkill = (index: number, direction: "left" | "right") => {
     const newSkills = [...skills];
     const otherIndex = direction === "left" ? index - 1 : index + 1;
@@ -243,7 +249,7 @@ export default function ProjectsSection() {
                           {skill}
                         </span>
                         <button
-                          onClick={() => handleRemoveSkill(skill)}
+                          onClick={() => handleRemoveSkillClick(skill)}
                           className="p-1 hover:text-destructive transition-colors opacity-0 group-hover:opacity-100"
                         >
                           <X size={14} />

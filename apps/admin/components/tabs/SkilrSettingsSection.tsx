@@ -28,6 +28,10 @@ export default function SkilrSettingsSection({
   const [sectionPendingDelete, setSectionPendingDelete] = useState<
     number | null
   >(null);
+  const [pointPendingDelete, setPointPendingDelete] = useState<{
+    sectionIndex: number;
+    pointIndex: number;
+  } | null>(null);
   const pointTextareaRefs = useRef<Record<string, HTMLTextAreaElement | null>>(
     {},
   );
@@ -42,6 +46,7 @@ export default function SkilrSettingsSection({
 
   useEffect(() => {
     setSectionPendingDelete(null);
+    setPointPendingDelete(null);
   }, [settings.cohortRules]);
 
   const saveSettings = async (nextSettings: Partial<SystemSettings>) => {
@@ -152,6 +157,7 @@ export default function SkilrSettingsSection({
         };
       }),
     );
+    setPointPendingDelete(null);
   };
 
   if (loading) {
@@ -277,38 +283,66 @@ export default function SkilrSettingsSection({
               />
 
               <div className="space-y-2">
-                {section.points.map((point, pointIndex) => (
-                  <div
-                    key={`section-${sectionIndex}-point-${pointIndex}`}
-                    className="flex items-end gap-2"
-                  >
-                    <textarea
-                      ref={(el) => {
-                        pointTextareaRefs.current[
-                          `${sectionIndex}-${pointIndex}`
-                        ] = el;
-                      }}
-                      value={point}
-                      onChange={(e) =>
-                        updateSectionPoint(
-                          sectionIndex,
-                          pointIndex,
-                          e.target.value,
-                        )
-                      }
-                      rows={1}
-                      className="flex-1 resize-none overflow-hidden px-3 py-2 bg-background border border-input rounded-md focus:ring-2 focus:ring-primary focus:outline-none leading-relaxed"
-                      placeholder="Rule point"
-                    />
-                    <button
-                      onClick={() => removePoint(sectionIndex, pointIndex)}
-                      disabled={section.points.length <= 1}
-                      className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded border border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                {section.points.map((point, pointIndex) => {
+                  const isPendingDelete =
+                    pointPendingDelete?.sectionIndex === sectionIndex &&
+                    pointPendingDelete?.pointIndex === pointIndex;
+
+                  return (
+                    <div
+                      key={`section-${sectionIndex}-point-${pointIndex}`}
+                      className="flex items-end gap-2"
                     >
-                      <Trash2 size={12} />
-                    </button>
-                  </div>
-                ))}
+                      <textarea
+                        ref={(el) => {
+                          pointTextareaRefs.current[
+                            `${sectionIndex}-${pointIndex}`
+                          ] = el;
+                        }}
+                        value={point}
+                        onChange={(e) =>
+                          updateSectionPoint(
+                            sectionIndex,
+                            pointIndex,
+                            e.target.value,
+                          )
+                        }
+                        rows={1}
+                        className="flex-1 resize-none overflow-hidden px-3 py-2 bg-background border border-input rounded-md focus:ring-2 focus:ring-primary focus:outline-none leading-relaxed"
+                        placeholder="Rule point"
+                      />
+                      {isPendingDelete ? (
+                        <div className="inline-flex items-center gap-1">
+                          <button
+                            onClick={() =>
+                              removePoint(sectionIndex, pointIndex)
+                            }
+                            className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded bg-red-600 text-white hover:bg-red-700"
+                          >
+                            <Trash2 size={12} />
+                            Delete
+                          </button>
+                          <button
+                            onClick={() => setPointPendingDelete(null)}
+                            className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded border border-border hover:bg-muted"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() =>
+                            setPointPendingDelete({ sectionIndex, pointIndex })
+                          }
+                          disabled={section.points.length <= 1}
+                          className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded border border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
 
               <button
