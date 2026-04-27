@@ -66,6 +66,14 @@ export default function UserDetailModal({
       return `${datePart} at ${payment.paymentTime}`;
     }
 
+    if (payment.paymentDate) {
+      return new Date(payment.paymentDate).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+    }
+
     if (
       payment.createdAt &&
       typeof payment.createdAt === "object" &&

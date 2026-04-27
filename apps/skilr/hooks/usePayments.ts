@@ -12,6 +12,28 @@ import {
 import { db } from "@ayasemota/firebase";
 import { Payment } from "@ayasemota/types";
 
+const getPaymentTimestamp = (payment: Payment) => {
+  const dateValue = payment.paymentDate || payment.date;
+
+  if (dateValue) {
+    const dateTime = `${dateValue} ${payment.paymentTime || "00:00"}`;
+    const parsed = new Date(dateTime).getTime();
+    if (!Number.isNaN(parsed)) {
+      return parsed;
+    }
+  }
+
+  if (
+    payment.createdAt &&
+    typeof payment.createdAt === "object" &&
+    "seconds" in payment.createdAt
+  ) {
+    return payment.createdAt.seconds * 1000;
+  }
+
+  return 0;
+};
+
 export const usePayments = (userEmail: string | null) => {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState<boolean>(!!userEmail);
@@ -43,11 +65,8 @@ export const usePayments = (userEmail: string | null) => {
           };
         });
 
-        paymentsData.sort((a, b) =>
-          a.createdAt && b.createdAt
-            ? b.createdAt.seconds - a.createdAt.seconds
-            : new Date(b.paymentDate || b.date).getTime() -
-              new Date(a.paymentDate || a.date).getTime()
+        paymentsData.sort(
+          (a, b) => getPaymentTimestamp(b) - getPaymentTimestamp(a),
         );
 
         setPayments(paymentsData);
