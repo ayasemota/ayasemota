@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { useProjects, Project } from "@/hooks/useProjects";
 import { doc, onSnapshot, setDoc } from "firebase/firestore";
-import { db } from "@ayasemota/firebase";
+import { db } from "@ayz/firebase";
 import { useToast } from "../ToastContext";
 import Preloader from "../Preloader";
 

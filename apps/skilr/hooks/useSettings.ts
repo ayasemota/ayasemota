@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { doc, onSnapshot } from "firebase/firestore";
-import { db } from "@ayasemota/firebase";
+import { db } from "@ayz/firebase";
 
 export interface CohortRulesSection {
   title: string;

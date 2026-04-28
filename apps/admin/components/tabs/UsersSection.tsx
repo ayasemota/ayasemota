@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Search, ArrowUpDown, Plus } from "lucide-react";
-import { User } from "@ayasemota/types";
+import { User } from "@ayz/types";
 import { TableSkeleton } from "@/components/Skeleton";
 import Modal from "@/components/Modal";
 import { useToast } from "../ToastContext";

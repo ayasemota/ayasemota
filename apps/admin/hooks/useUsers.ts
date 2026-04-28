@@ -8,8 +8,8 @@ import {
   deleteDoc,
   Timestamp,
 } from "firebase/firestore";
-import { db } from "@ayasemota/firebase";
-import { User } from "@ayasemota/types";
+import { db } from "@ayz/firebase";
+import { User } from "@ayz/types";
 
 export const useUsers = () => {
   const [users, setUsers] = useState<User[]>([]);

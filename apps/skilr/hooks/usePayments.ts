@@ -9,8 +9,8 @@ import {
   doc,
   updateDoc,
 } from "firebase/firestore";
-import { db } from "@ayasemota/firebase";
-import { Payment } from "@ayasemota/types";
+import { db } from "@ayz/firebase";
+import { Payment } from "@ayz/types";
 
 const getPaymentTimestamp = (payment: Payment) => {
   const dateValue = payment.paymentDate || payment.date;
@@ -76,7 +76,7 @@ export const usePayments = (userEmail: string | null) => {
       (err) => {
         setError(err.message);
         setLoading(false);
-      }
+      },
     );
 
     return unsubscribe;
@@ -97,7 +97,7 @@ export const usePayments = (userEmail: string | null) => {
 
   const updatePayment = async (
     paymentId: string,
-    updates: Partial<Omit<Payment, "id">>
+    updates: Partial<Omit<Payment, "id">>,
   ) => {
     try {
       const paymentRef = doc(db, "payments", paymentId);

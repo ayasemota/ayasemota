@@ -9,8 +9,8 @@ import {
   addDoc,
   Timestamp,
 } from "firebase/firestore";
-import { db } from "@ayasemota/firebase";
-import { Payment } from "@ayasemota/types";
+import { db } from "@ayz/firebase";
+import { Payment } from "@ayz/types";
 
 const getPaymentTimestamp = (payment: Payment) => {
   const dateValue = payment.paymentDate || payment.date;

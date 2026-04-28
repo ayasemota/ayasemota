@@ -9,9 +9,9 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@ayasemota/firebase": "*",
-    "@ayasemota/paystack": "*",
-    "@ayasemota/types": "*",
+    "@ayz/firebase": "*",
+    "@ayz/paystack": "*",
+    "@ayz/types": "*",
     "firebase": "^12.7.0",
     "lucide-react": "^0.562.0",
     "next": "^16.1.6",

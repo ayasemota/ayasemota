@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: "All-In-One Management System",
   applicationName: "Admin",
   authors: [{ name: "AY Asemota" }],
-  keywords: ["admin", "ayasemota"],
+  keywords: ["admin", "ayz"],
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,

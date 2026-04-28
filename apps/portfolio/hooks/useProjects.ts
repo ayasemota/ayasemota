@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
-import { db } from "@ayasemota/firebase";
+import { db } from "@ayz/firebase";
 
 export interface Project {
   id: string;
@@ -24,9 +24,9 @@ export const useProjects = () => {
 
     const q = query(collection(db, "projects"), orderBy("index", "asc"));
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const projectsData = snapshot.docs.map(doc => ({
+      const projectsData = snapshot.docs.map((doc) => ({
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
       })) as Project[];
       setProjects(projectsData);
       setLoading(false);

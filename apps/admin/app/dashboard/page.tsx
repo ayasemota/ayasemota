@@ -21,8 +21,8 @@ import { useEvents } from "@/hooks/useEvents";
 import { useAnnouncements } from "@/hooks/useAnnouncements";
 import { useInactivityLogout } from "@/hooks/useInactivityLogout";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
-import { User } from "@ayasemota/types";
-import { Payment } from "@ayasemota/types";
+import { User } from "@ayz/types";
+import { Payment } from "@ayz/types";
 import { ToastProvider } from "@/components/ToastContext";
 import { useSettings } from "@/hooks/useSettings";
 

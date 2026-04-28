@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { doc, onSnapshot } from "firebase/firestore";
-import { db } from "@ayasemota/firebase";
+import { db } from "@ayz/firebase";
 
 export interface PortfolioData {
   about: string[];
@@ -10,7 +10,7 @@ export interface PortfolioData {
 export const usePortfolioData = () => {
   const [data, setData] = useState<PortfolioData>({
     about: [],
-    skills: []
+    skills: [],
   });
   const [loading, setLoading] = useState(true);
 
@@ -26,7 +26,7 @@ export const usePortfolioData = () => {
         const d = snapshot.data();
         setData({
           about: Array.isArray(d.about) ? d.about : [d.about || ""],
-          skills: Array.isArray(d.skills) ? d.skills : []
+          skills: Array.isArray(d.skills) ? d.skills : [],
         });
       }
       setLoading(false);

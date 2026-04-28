@@ -41,7 +41,7 @@ export default function Home() {
             isLoaded={isLoaded}
           />
 
-          <div className="min-h-[400px]">
+          <div className="min-h-100">
             {activeSection === "work" && <WorkSection />}
             {activeSection === "skills" && <SkillsSection />}
             {activeSection === "about" && <AboutSection />}

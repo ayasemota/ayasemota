@@ -1,7 +1,7 @@
 "use client";
 
 import { Users, Calendar, Megaphone, TrendingUp } from "lucide-react";
-import { User, Payment, Event, Announcement } from "@ayasemota/types";
+import { User, Payment, Event, Announcement } from "@ayz/types";
 
 interface DashboardSummaryProps {
   users: User[];

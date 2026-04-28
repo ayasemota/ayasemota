@@ -11,8 +11,8 @@ import {
   orderBy,
   query,
 } from "firebase/firestore";
-import { db } from "@ayasemota/firebase";
-import { Announcement } from "@ayasemota/types";
+import { db } from "@ayz/firebase";
+import { Announcement } from "@ayz/types";
 
 export const useAnnouncements = () => {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);

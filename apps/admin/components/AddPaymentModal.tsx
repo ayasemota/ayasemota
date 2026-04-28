@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Modal from "./Modal";
-import { User } from "@ayasemota/types";
+import { User } from "@ayz/types";
 import { Calendar, Clock } from "lucide-react";
 import { useToast } from "./ToastContext";
 

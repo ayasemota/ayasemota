@@ -1,7 +1,6 @@
 import {
   Home,
   CreditCard,
-  HelpCircle,
   LogOut,
   Lock,
   GraduationCap,
@@ -83,18 +82,6 @@ export const Sidebar = ({
           >
             <GraduationCap size={20} />
             <span>Cohort</span>
-          </button>
-
-          <button
-            onClick={() => handleNavigate("help")}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg ${
-              currentPage === "help"
-                ? "bg-blue-500/10 text-blue-400 border border-blue-500/20"
-                : "text-gray-400 hover:bg-gray-800/50 hover:text-white"
-            }`}
-          >
-            <HelpCircle size={20} />
-            <span>Help & Support</span>
           </button>
         </nav>
 

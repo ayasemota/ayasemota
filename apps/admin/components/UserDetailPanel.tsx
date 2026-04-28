@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
-import { User, Payment } from "@ayasemota/types";
+import { User, Payment } from "@ayz/types";
 
 interface UserDetailPanelProps {
   user: User;

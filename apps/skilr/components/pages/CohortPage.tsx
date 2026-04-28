@@ -1,5 +1,5 @@
 import { Rocket, ExternalLink } from "lucide-react";
-import { User } from "@ayasemota/types";
+import { User } from "@ayz/types";
 
 interface CohortPageProps {
   user: User;

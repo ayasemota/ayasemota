@@ -11,7 +11,9 @@ export default function WorkSection() {
     return (
       <div className="flex flex-col items-center justify-center py-20 space-y-4">
         <Loader2 className="w-8 h-8 text-accent-purple animate-spin" />
-        <p className="text-muted-light animate-pulse">Loading amazing projects...</p>
+        <p className="text-muted-light animate-pulse">
+          Loading amazing projects...
+        </p>
       </div>
     );
   }

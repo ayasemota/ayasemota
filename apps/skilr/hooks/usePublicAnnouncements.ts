@@ -6,8 +6,8 @@ import {
   onSnapshot,
   limit,
 } from "firebase/firestore";
-import { db } from "@ayasemota/firebase";
-import { Announcement } from "@ayasemota/types";
+import { db } from "@ayz/firebase";
+import { Announcement } from "@ayz/types";
 
 export const usePublicAnnouncements = () => {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
@@ -45,7 +45,7 @@ export const usePublicAnnouncements = () => {
           message: error instanceof Error ? error.message : String(error),
         });
         setLoading(false);
-      }
+      },
     );
 
     return unsubscribe;
