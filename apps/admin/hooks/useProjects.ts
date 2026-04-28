@@ -1,16 +1,16 @@
 import { useState, useEffect } from "react";
-import { 
-  collection, 
-  onSnapshot, 
-  doc, 
-  addDoc, 
-  updateDoc, 
-  deleteDoc, 
-  query, 
+import {
+  collection,
+  onSnapshot,
+  doc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  query,
   orderBy,
-  writeBatch
+  writeBatch,
 } from "firebase/firestore";
-import { db } from "@ayasemota/firebase";
+import { db } from "@ayz/firebase";
 
 export interface Project {
   id?: string;
@@ -34,9 +34,9 @@ export const useProjects = () => {
 
     const q = query(collection(db, "projects"), orderBy("index", "asc"));
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const projectsData = snapshot.docs.map(doc => ({
+      const projectsData = snapshot.docs.map((doc) => ({
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
       })) as Project[];
       setProjects(projectsData);
       setLoading(false);
@@ -46,10 +46,11 @@ export const useProjects = () => {
   }, []);
 
   const addProject = async (project: Omit<Project, "id" | "index">) => {
-    const newIndex = projects.length > 0 ? Math.max(...projects.map(p => p.index)) + 1 : 0;
+    const newIndex =
+      projects.length > 0 ? Math.max(...projects.map((p) => p.index)) + 1 : 0;
     await addDoc(collection(db, "projects"), {
       ...project,
-      index: newIndex
+      index: newIndex,
     });
   };
 
@@ -71,7 +72,7 @@ export const useProjects = () => {
 
     try {
       const batch = writeBatch(db);
-      
+
       const p1 = newProjects[index];
       const p2 = newProjects[otherIndex];
 
@@ -94,5 +95,12 @@ export const useProjects = () => {
     }
   };
 
-  return { projects, loading, addProject, updateProject, deleteProject, reorderProject };
+  return {
+    projects,
+    loading,
+    addProject,
+    updateProject,
+    deleteProject,
+    reorderProject,
+  };
 };

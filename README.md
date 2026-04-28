@@ -1,4 +1,4 @@
-- 👋 Hi, I’m @ayasemota
+- 👋 Hi, I’m @ayz
 - 👀 I’m interested in web3 and web apps.
 - 🌱 I’m currently learning app development.
 - 💞️ I’m looking to collaborate on intresting web3 and fintech projects.

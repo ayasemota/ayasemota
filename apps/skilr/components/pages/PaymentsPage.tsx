@@ -1,8 +1,8 @@
 import { useState, useMemo } from "react";
 import { User as UserIcon, Mail, Phone, Copy, CheckCheck } from "lucide-react";
 import { Timestamp } from "firebase/firestore";
-import { User as UserType, Payment, PaystackResponse } from "@ayasemota/types";
-import { PAYSTACK_PUBLIC_KEY, convertToKobo } from "@ayasemota/paystack";
+import { User as UserType, Payment, PaystackResponse } from "@ayz/types";
+import { PAYSTACK_PUBLIC_KEY, convertToKobo } from "@ayz/paystack";
 import { usePaystack } from "@/hooks/usePaystack";
 import { usePayments } from "@/hooks/usePayments";
 import { useSettings } from "@/hooks/useSettings";
@@ -34,26 +34,20 @@ const getRandomTransactionFee = (min: number, max: number) => {
 
 const getPaymentDateTime = (payment: Payment) => {
   if (payment.paymentDate && payment.paymentTime) {
-    const datePart = new Date(payment.paymentDate).toLocaleDateString(
-      "en-US",
-      {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      },
-    );
+    const datePart = new Date(payment.paymentDate).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
     return `${datePart} at ${payment.paymentTime}`;
   }
 
   if (payment.paymentDate) {
-    const datePart = new Date(payment.paymentDate).toLocaleDateString(
-      "en-US",
-      {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      },
-    );
+    const datePart = new Date(payment.paymentDate).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
     return datePart;
   }
 

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { User, Payment } from "@ayasemota/types";
+import { User, Payment } from "@ayz/types";
 import { X, Calendar, Megaphone, Lock } from "lucide-react";
 
 interface DashboardPageProps {
@@ -43,14 +43,11 @@ const formatCurrency = (amount: number) => {
 
 const getPaymentDateTime = (payment: Payment) => {
   if (payment.paymentDate && payment.paymentTime) {
-    const datePart = new Date(payment.paymentDate).toLocaleDateString(
-      "en-US",
-      {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      },
-    );
+    const datePart = new Date(payment.paymentDate).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
     return `${datePart} at ${payment.paymentTime}`;
   }
 

@@ -11,7 +11,6 @@ import { Sidebar } from "@/components/Sidebar";
 import { DashboardPage } from "@/components/pages/DashboardPage";
 import { CohortPage } from "@/components/pages/CohortPage";
 import { PaymentsPage } from "@/components/pages/PaymentsPage";
-import { HelpPage } from "@/components/pages/HelpPage";
 import { Footer } from "@/components/Footer";
 import { Logo } from "@/components/Logo";
 import { UnavailableModal } from "@/components/UnavailableModal";
@@ -152,7 +151,6 @@ export default function Dashboard() {
                   updateUnclearedAmount={updateUnclearedAmount}
                 />
               )}
-              {currentPage === "help" && <HelpPage />}
               <Footer />
             </div>
           </main>

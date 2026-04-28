@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useCallback } from "react";
 import { Search, ArrowUpDown } from "lucide-react";
-import { Payment, User } from "@ayasemota/types";
+import { Payment, User } from "@ayz/types";
 import { TableSkeleton } from "@/components/Skeleton";
 
 interface PaymentsSectionProps {

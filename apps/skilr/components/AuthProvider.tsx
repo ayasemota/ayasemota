@@ -17,8 +17,8 @@ import {
   getDocs,
   onSnapshot,
 } from "firebase/firestore";
-import { db } from "@ayasemota/firebase";
-import { User } from "@ayasemota/types";
+import { db } from "@ayz/firebase";
+import { User } from "@ayz/types";
 
 interface AuthContextType {
   isLoggedIn: boolean;

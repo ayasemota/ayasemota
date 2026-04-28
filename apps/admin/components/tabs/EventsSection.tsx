@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Plus, Calendar, Clock, Eye, EyeOff, Trash2 } from "lucide-react";
 import Modal from "../Modal";
-import { Event } from "@ayasemota/types";
+import { Event } from "@ayz/types";
 import { useToast } from "../ToastContext";
 
 interface EventsSectionProps {

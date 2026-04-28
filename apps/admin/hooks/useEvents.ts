@@ -11,8 +11,8 @@ import {
   orderBy,
   query,
 } from "firebase/firestore";
-import { db } from "@ayasemota/firebase";
-import { Event } from "@ayasemota/types";
+import { db } from "@ayz/firebase";
+import { Event } from "@ayz/types";
 
 export const useEvents = () => {
   const [events, setEvents] = useState<Event[]>([]);

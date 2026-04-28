@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Modal from "./Modal";
-import { User, Payment } from "@ayasemota/types";
+import { User, Payment } from "@ayz/types";
 import { Plus, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import AddPaymentModal from "./AddPaymentModal";
 

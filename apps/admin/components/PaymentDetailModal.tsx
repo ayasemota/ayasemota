@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Modal from "./Modal";
-import { Payment, User } from "@ayasemota/types";
+import { Payment, User } from "@ayz/types";
 import { Trash2, Calendar, Clock } from "lucide-react";
 import { useToast } from "./ToastContext";
 

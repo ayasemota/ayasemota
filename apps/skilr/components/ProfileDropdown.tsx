@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { User as UserType } from "@ayasemota/types";
+import { User as UserType } from "@ayz/types";
 
 interface ProfileDropdownProps {
   user: UserType;

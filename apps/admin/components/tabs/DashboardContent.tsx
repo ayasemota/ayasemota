@@ -18,7 +18,7 @@ import { useAllPayments } from "@/hooks/useAllPayments";
 import { useEvents } from "@/hooks/useEvents";
 import { useAnnouncements } from "@/hooks/useAnnouncements";
 import { useInactivityLogout } from "@/hooks/useInactivityLogout";
-import { User, Payment } from "@ayasemota/types";
+import { User, Payment } from "@ayz/types";
 
 const pageTitles: Record<string, string> = {
   dashboard: "Dashboard",

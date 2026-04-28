@@ -2,7 +2,7 @@
 
 import EventsSection from "./EventsSection";
 import AnnouncementsSection from "./AnnouncementsSection";
-import { Event, Announcement } from "@ayasemota/types";
+import { Event, Announcement } from "@ayz/types";
 
 interface UpdatesSectionProps {
   events: Event[];
