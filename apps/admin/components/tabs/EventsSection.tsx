@@ -25,9 +25,6 @@ export default function EventsSection({
 }: EventsSectionProps) {
   const { showToast } = useToast();
   const [showNewForm, setShowNewForm] = useState(false);
-  const [deleteConfirmation, setDeleteConfirmation] = useState<string | null>(
-    null,
-  );
   const [newEvent, setNewEvent] = useState({
     title: "",
     description: "",
@@ -72,23 +69,22 @@ export default function EventsSection({
     }
   };
 
-  const handleDeleteClick = (eventId: string) => {
-    setDeleteConfirmation(eventId);
-  };
+  const handleDeleteClick = async (eventId: string) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this event? This action cannot be undone.",
+    );
 
-  const handleConfirmDelete = async () => {
-    if (deleteConfirmation) {
-      const deletedEvent = events.find((e) => e.id === deleteConfirmation);
+    if (!confirmed) return;
 
-      try {
-        await onDeleteEvent(deleteConfirmation);
-        if (deletedEvent) {
-          showToast("Event deleted successfully");
-        }
-      } catch (error) {
-        console.error("Error deleting event:", error);
+    const deletedEvent = events.find((e) => e.id === eventId);
+
+    try {
+      await onDeleteEvent(eventId);
+      if (deletedEvent) {
+        showToast("Event deleted successfully");
       }
-      setDeleteConfirmation(null);
+    } catch (error) {
+      console.error("Error deleting event:", error);
     }
   };
 
@@ -183,34 +179,6 @@ export default function EventsSection({
               onClick={() => setShowNewForm(false)}
               disabled={isSaving}
               className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      </Modal>
-
-      <Modal
-        isOpen={deleteConfirmation !== null}
-        onClose={() => setDeleteConfirmation(null)}
-        title="Delete Event"
-        size="sm"
-      >
-        <div className="p-6 space-y-4">
-          <p className="text-gray-700">
-            Are you sure you want to delete this event? This action cannot be
-            undone.
-          </p>
-          <div className="flex gap-3">
-            <button
-              onClick={handleConfirmDelete}
-              className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
-            >
-              Delete
-            </button>
-            <button
-              onClick={() => setDeleteConfirmation(null)}
-              className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
             >
               Cancel
             </button>

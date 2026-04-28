@@ -30,7 +30,6 @@ export default function PaymentDetailModal({
   const [editedPayment, setEditedPayment] = useState<Payment | null>(payment);
   const [, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     if (payment) {
@@ -88,6 +87,13 @@ export default function PaymentDetailModal({
 
   const handleDelete = async () => {
     if (!payment.id) return;
+
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this payment? This action cannot be undone.",
+    );
+
+    if (!confirmed) return;
+
     setIsDeleting(true);
     try {
       await onPaymentDelete(payment.id);
@@ -97,7 +103,6 @@ export default function PaymentDetailModal({
       console.error("Error deleting payment:", error);
     } finally {
       setIsDeleting(false);
-      setShowDeleteConfirm(false);
     }
   };
 
@@ -236,39 +241,14 @@ export default function PaymentDetailModal({
           </div>
         </div>
 
-        {showDeleteConfirm ? (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 space-y-4">
-            <p className="text-red-800 font-medium">
-              Are you sure you want to delete this payment?
-            </p>
-            <p className="text-red-600 text-sm">
-              This action cannot be undone.
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={handleDelete}
-                disabled={isDeleting}
-                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium disabled:opacity-50"
-              >
-                {isDeleting ? "Deleting..." : "Delete"}
-              </button>
-              <button
-                onClick={() => setShowDeleteConfirm(false)}
-                className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        ) : (
-          <button
-            onClick={() => setShowDeleteConfirm(true)}
-            className="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium flex items-center justify-center gap-2"
-          >
-            <Trash2 size={18} />
-            Delete Payment
-          </button>
-        )}
+        <button
+          onClick={handleDelete}
+          disabled={isDeleting}
+          className="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium flex items-center justify-center gap-2 disabled:opacity-50"
+        >
+          <Trash2 size={18} />
+          {isDeleting ? "Deleting..." : "Delete Payment"}
+        </button>
       </div>
     </Modal>
   );

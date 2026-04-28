@@ -42,7 +42,6 @@ export default function UserDetailModal({
 }: UserDetailModalProps) {
   const [editedUser, setEditedUser] = useState<User | null>(user);
   const [showAddPayment, setShowAddPayment] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showRegDetails, setShowRegDetails] = useState(false);
   const { showToast } = useToast();
@@ -126,6 +125,13 @@ export default function UserDetailModal({
 
   const handleDelete = async () => {
     if (!user.id) return;
+
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this user? This action cannot be undone and will permanently remove this user.",
+    );
+
+    if (!confirmed) return;
+
     setIsDeleting(true);
     try {
       await onDeleteUser(user.id);
@@ -136,7 +142,6 @@ export default function UserDetailModal({
       showToast("Failed to delete user");
     } finally {
       setIsDeleting(false);
-      setShowDeleteConfirm(false);
     }
   };
 
@@ -324,40 +329,14 @@ export default function UserDetailModal({
 
             {/* Delete button section */}
             <div className="pt-4 border-t border-gray-200 mt-4">
-              {showDeleteConfirm ? (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4 space-y-4">
-                  <p className="text-red-800 font-medium">
-                    Are you sure you want to delete this user?
-                  </p>
-                  <p className="text-red-600 text-sm">
-                    This action cannot be undone and will permanently remove
-                    this user.
-                  </p>
-                  <div className="flex gap-3">
-                    <button
-                      onClick={handleDelete}
-                      disabled={isDeleting}
-                      className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium disabled:opacity-50"
-                    >
-                      {isDeleting ? "Deleting..." : "Confirm Delete"}
-                    </button>
-                    <button
-                      onClick={() => setShowDeleteConfirm(false)}
-                      className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <button
-                  onClick={() => setShowDeleteConfirm(true)}
-                  className="w-full px-4 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors font-medium flex items-center justify-center gap-2"
-                >
-                  <Trash2 size={18} />
-                  Delete User
-                </button>
-              )}
+              <button
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="w-full px-4 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors font-medium flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                <Trash2 size={18} />
+                {isDeleting ? "Deleting..." : "Delete User"}
+              </button>
             </div>
           </div>
 

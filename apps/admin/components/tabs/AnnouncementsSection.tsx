@@ -31,9 +31,6 @@ export default function AnnouncementsSection({
 }: AnnouncementsSectionProps) {
   const { showToast } = useToast();
   const [showNewForm, setShowNewForm] = useState(false);
-  const [deleteConfirmation, setDeleteConfirmation] = useState<string | null>(
-    null,
-  );
   const [newAnnouncement, setNewAnnouncement] = useState({
     title: "",
     description: "",
@@ -70,25 +67,24 @@ export default function AnnouncementsSection({
     }
   };
 
-  const handleDeleteClick = (announcementId: string) => {
-    setDeleteConfirmation(announcementId);
-  };
+  const handleDeleteClick = async (announcementId: string) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this announcement? This action cannot be undone.",
+    );
 
-  const handleConfirmDelete = async () => {
-    if (deleteConfirmation) {
-      const deletedAnnouncement = announcements.find(
-        (a) => a.id === deleteConfirmation,
-      );
+    if (!confirmed) return;
 
-      try {
-        await onDeleteAnnouncement(deleteConfirmation);
-        if (deletedAnnouncement) {
-          showToast("Announcement deleted successfully");
-        }
-      } catch (error) {
-        console.error("Error deleting announcement:", error);
+    const deletedAnnouncement = announcements.find(
+      (a) => a.id === announcementId,
+    );
+
+    try {
+      await onDeleteAnnouncement(announcementId);
+      if (deletedAnnouncement) {
+        showToast("Announcement deleted successfully");
       }
-      setDeleteConfirmation(null);
+    } catch (error) {
+      console.error("Error deleting announcement:", error);
     }
   };
 
@@ -185,34 +181,6 @@ export default function AnnouncementsSection({
               onClick={() => setShowNewForm(false)}
               disabled={isSaving}
               className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      </Modal>
-
-      <Modal
-        isOpen={deleteConfirmation !== null}
-        onClose={() => setDeleteConfirmation(null)}
-        title="Delete Announcement"
-        size="sm"
-      >
-        <div className="p-6 space-y-4">
-          <p className="text-gray-700">
-            Are you sure you want to delete this announcement? This action
-            cannot be undone.
-          </p>
-          <div className="flex gap-3">
-            <button
-              onClick={handleConfirmDelete}
-              className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
-            >
-              Delete
-            </button>
-            <button
-              onClick={() => setDeleteConfirmation(null)}
-              className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
             >
               Cancel
             </button>
